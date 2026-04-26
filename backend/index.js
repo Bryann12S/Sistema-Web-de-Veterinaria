@@ -1,8 +1,12 @@
 const express = require('express');
-const db = require('./src/config/db');
+const cors = require('cors');
+const db = require('./src/config/db.js');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+
+app.use(cors());
+app.use(express.json());
 // Verificar la conexión a la base de datos antes de iniciar el servidor
 app.get('/test-db', async (req, res) => {
     try {
