@@ -1,14 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const mascota = require('../models/mascotaModel');
+const mascotaController = require('../controllers/mascotaController');
 
-router.get('/', async (req, res) => {
-    try {
-        const mascotas = await mascota.getAll();
-        res.json(mascotas);
-    } catch (error){
-        res.status(500).json({error: error.menssage});
-    }
-});
+//Defincion de rutas apuntando al controller
+router.get('/', mascotaController.listar);
+router.post('/', mascotaController.crear);
+router.put('/:id', mascotaController.actualizar);
+router.delete('/:id', mascotaController.eliminar);
 
 module.exports = router;
