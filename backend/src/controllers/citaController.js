@@ -24,7 +24,18 @@ const citaController = {
         try {
             const id = req.params.id;
             const { estado } = req.body;
-            await Cita.actualizarEstado(id, estado);
+
+            //evitar esatdo que no existen en la BD
+            const opcionesValidadas = ['pendiente','confirmada', 'cancelada'];
+            if (!estado || !opcionesValidadas.includes(estado.toLowerCase().trim())) {
+                return res.status(400).json({
+                    message:"Estado no válido",
+                    opciones: opcionesValidadas
+                })
+            }
+            
+            await Cita.actualizarEstado(id, estado.toLowerCase().trim());
+
             res.json({ message: "Estado de la cita actualizado exitosamente" });
         } catch (error) {
             res.status(500).json({ message: "Error al actualizar el estado de la cita", error: error.message });

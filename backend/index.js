@@ -4,7 +4,7 @@ const db = require('./src/config/db');
 
 //importar rutas 
 const mascotaRoutes = require('./src/routes/mascotasRoutes');
-const usuarioRoutes = require('./src/routes/usuarioRouter');
+const usuarioRoutes = require('./src/routes/usuarioRoutes');
 const citaRoutes = require('./src/routes/citaRoutes');
 
 const app = express();
