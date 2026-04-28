@@ -1,5 +1,6 @@
 const Usuario = require('../models/usuarioModel');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
 const usuarioController = {
     //registro
@@ -28,7 +29,17 @@ const usuarioController = {
             if (!passwordMatch) {
                 return res.status(401).json({ error: "Contraseña incorrecta" });
             }
-            res.json({ message: "Login exitoso", usuario: { id: usuario.id, nombre: usuario.nombre, rol: usuario.rol } });
+
+            //usar jwt para generar un token de autenticación
+            if(passwordMatch){
+                const token = jwt.sign(
+                    { id: usuario.id, rol: usuario.rol },  //payload del token
+                      process.env.JWT_SECRET,  //clave secreta para firmar el token
+                      { expiresIn: '1h' } //timepo de expiración del token
+                    );
+
+                res.json({ message: "Login exitoso", token, usuario: { id: usuario.id, nombre: usuario.nombre, rol: usuario.rol } });
+            }
         } catch (error) {
             res.status(500).json({ error: "Error al iniciar sesión" + error.message });
         }       
