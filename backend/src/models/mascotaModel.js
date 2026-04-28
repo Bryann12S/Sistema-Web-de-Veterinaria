@@ -6,7 +6,7 @@ const Mascota = {
         return rows;
     },
     getByUser: async (userId) => {
-        const [rows] = await db.query('SELECT * FROM mascotas WHERE usuario_id = ?', [userId]);
+        const [rows] = await db.query('SELECT * FROM mascotas WHERE user_id = ?', [userId]);
         return rows;
     }
 };

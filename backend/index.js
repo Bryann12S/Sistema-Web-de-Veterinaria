@@ -8,6 +8,7 @@ const PORT = process.env.PORT || 3000;
 
 const Mascota = require('./src/models/mascotaModel');
 const Usuario = require('./src/models/usuarioModel');
+const cita = require('./src/models/citasModel');
 
 app.use(cors());
 app.use(express.json());
@@ -40,6 +41,25 @@ app.get('/mascotas', async (req, res)=>{
     }
 });
 
+//obtener todas las citas
+app.get('/citas', async (req, res) => {
+    try {
+        const citas = await cita.getAll();
+        res.json(citas);
+    } catch (error) {
+        res.status(500).json({error: error.message});
+    }
+});
+
+//Agendar Cita
+app.post('/citas', async (req, res) => {
+    try {
+        const id = await cita.crear(req.body);
+        res.status(201).json({ message: "Cita creada exitosamente", id });
+    } catch (error) {
+        res.status(500).json({ message: "Error al crear la cita", error: error.message });
+    }
+});
 
 app.listen(PORT, () =>{
     console.log(`Servidor corriendo en http://localhost:${PORT}`);
