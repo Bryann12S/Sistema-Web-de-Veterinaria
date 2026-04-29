@@ -1,10 +1,17 @@
 const Mascota = require('../models/mascotaModel');
 
 const mascotaController = {
-    //obtener todas kas mascotas 
+    //obtener mascotas por usuario o todas si es admin
     listar: async (req, res) => {
         try {
-            const mascotas = await Mascota.getAll();
+            const userId = req.user.id; // Asumiendo que el middleware de autenticación agrega el usuario al request
+            const rol = req.user.rol; // Obtener el rol del usuario
+            let mascotas;
+            if (rol === 'admin') {
+                mascotas = await Mascota.getAll(); // Si es admin, obtiene todas las mascotas
+            } else {
+                mascotas = await Mascota.getByUser(userId); // Si no es admin, obtiene solo las mascotas del usuario
+            }
             res.json(mascotas);
         } catch (error) {
             res.status(500).json({ error: error.message });

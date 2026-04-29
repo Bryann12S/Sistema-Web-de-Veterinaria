@@ -9,9 +9,9 @@ const verificacionToken = (req, res, next) => {
 
     try{
         const decoded = jwt.verify(token, process.env.JWT_SECRET); // Verificar el token
-        req.usuario = decoded; // Agregar la información del usuario al objeto de solicitud
+        req.user = decoded; // Agregar la información del usuario al objeto de solicitud
         next(); // Continuar con la siguiente función de middleware o ruta
-    } catch (errpr) {
+    } catch (error) {
         return res.status(401).json({ error: "Token inválido" });
     }
 };
