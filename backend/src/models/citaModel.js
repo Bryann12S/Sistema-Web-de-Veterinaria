@@ -1,4 +1,6 @@
 const db = require('../config/db');
+const { get } = require('../routes/mascotasRoutes');
+const { getByUser } = require('./mascotaModel');
 
 const Cita = {
     //obtener todas la citas con el nombre de la mascota 
@@ -7,6 +9,14 @@ const Cita = {
             SELECT c.*, m.nombre AS nombre_mascota
             FROM citas c 
             JOIN mascotas m ON c.mascota_id = m.id`);
+        return rows;
+    },
+    getByUser: async (userId) => {
+        const [rows] = await db.query(`
+            SELECT c.*, m.nombre AS nombre_mascota
+            FROM citas c
+            JOIN mascotas m ON c.mascota_id = m.id
+            WHERE m.user_id = ?`, [userId]);
         return rows;
     },
 

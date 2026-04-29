@@ -4,7 +4,13 @@ const citaController = {
     //obtener todas las citas
     listar: async (req, res) => {
         try {
-            const citas = await Cita.getAll();
+            const {id, rol} = req.user; // Obtener el ID y rol del usuario desde el token
+            let citas;
+            if (rol === "admin" || rol === "veterinario"){
+                citas = await Cita.getAll(); // Si es admin o veterinario, obtiene todas las citas 
+            } else{
+                citas = await Cita.getByUser(id); // Si no es admin, obtiene solo las citas del usuario
+            }
             res.json(citas);
         } catch (error) {
             res.status(500).json({ error: error.message });
