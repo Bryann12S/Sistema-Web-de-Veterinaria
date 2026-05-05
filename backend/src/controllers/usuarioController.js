@@ -82,7 +82,25 @@ const usuarioController = {
         } catch (error) {
             res.status(500).json({ error: "Error al iniciar sesión" + error.message });
         }       
-    }
+    },
+    obtenerPerfil: async (req, res) => {
+        try {
+            if (!req.user || !req.user.id) {
+                return res.status(401).json({ error: "Usuario no autenticado" });
+            }
+
+            const usuario = await Usuario.buscarPorId(req.user.id);
+
+            if (!usuario) {
+                return res.status(404).json({ error: "Usuario no encontrado" });
+            }
+
+            //const { password, ...datosPublicos } = usuario;
+            res.json(usuario);
+        } catch (error) {
+            res.status(500).json({ error: "Error al obtener el perfil", detalle: process.env.NODE_ENV === 'development' ? error.message : undefined });
+        }
+    }   
 };
 
 module.exports = usuarioController;

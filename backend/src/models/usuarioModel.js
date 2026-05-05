@@ -10,6 +10,11 @@ const Usuario = {
         const query = 'SELECT * FROM usuarios WHERE email = ?';
         const [rows] = await db.execute(query, [email]);
         return rows[0];
+    },
+    buscarPorId: async (id) => {
+        const query = 'SELECT id, nombre, email, rol FROM usuarios WHERE id = ?';
+        const [rows] = await db.execute(query, [id]);
+        return rows[0];
     }
 };
 

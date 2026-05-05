@@ -8,5 +8,6 @@ const { authorize } = require('../middlewares/roleMiddleware');
 router.post('/registro', usuarioController.registrarCliente);
 router.post('/crear-personal',verificacionToken, authorize('admin'), usuarioController.crearPersonal);
 router.post('/login', usuarioController.login);
+router.get('/perfil', verificacionToken, usuarioController.obtenerPerfil);
 
 module.exports = router;
