@@ -35,4 +35,11 @@ export class Login {
       }
     });
   }
+  
+  ngOnInit() {
+    const token = localStorage.getItem('token');
+    if (token) {
+      this.router.navigate(['/app/dashboard']);
+    }
+  }
 }
