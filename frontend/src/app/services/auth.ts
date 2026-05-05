@@ -20,7 +20,17 @@ export class Auth {
       })
     );
   }
+
   logaut() {
     localStorage.clear();
+  }
+
+  getRol(){
+    const user = JSON.parse(localStorage.getItem('user')||'{}');
+    return user.rol || null;
+  }
+
+  hasRol(roles: string[]): boolean {
+    return roles.includes(this.getRol());
   }
 }
