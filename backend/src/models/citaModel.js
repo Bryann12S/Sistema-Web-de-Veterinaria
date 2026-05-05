@@ -21,10 +21,10 @@ const Cita = {
 
     //crear nueva cita
     crear: async (data) => {
-        const { fecha, hora, mascota_id, motivo } = data;
+        const { fecha, hora, mascota_id, motivo, tipo_consulta } = data;
         const [result] = await db.execute(
-            `INSERT INTO citas (fecha, hora, mascota_id, motivo) VALUES (?, ?, ?, ?)`,
-            [fecha, hora, mascota_id, motivo]
+            `INSERT INTO citas (fecha, hora, mascota_id, motivo, tipo_consulta) VALUES (?, ?, ?, ?, ?)`,
+            [fecha, hora, mascota_id, motivo, tipo_consulta]
         );
         return result.insertId;
     },

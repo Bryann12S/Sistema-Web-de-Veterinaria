@@ -19,6 +19,19 @@ const citaController = {
     //agendar cita
     crear: async (req, res) => {
         try {
+            const {tipo_consulta} = req.body;
+            
+            const tiposPermitidos = [
+                'General', 'Vacunación', 'Desparasitación', 
+                'Cirugía', 'Urgencia', 'Estética', 'Control'
+            ];
+
+            if (tipo_consulta && !tiposPermitidos.includes(tipo_consulta)) {
+                return res.status(400).json({
+                    message: "Tipo de consulta no válido",
+                    opciones: tiposPermitidos
+                });
+            }
             const id = await Cita.crear(req.body);
             res.status(201).json({ message: "Cita creada exitosamente", id });
         } catch (error) {
@@ -32,7 +45,7 @@ const citaController = {
             const { estado } = req.body;
 
             //evitar esatdo que no existen en la BD
-            const opcionesValidadas = ['pendiente','confirmada', 'cancelada'];
+            const opcionesValidadas = ['pendiente','completada', 'cancelada'];
             if (!estado || !opcionesValidadas.includes(estado.toLowerCase().trim())) {
                 return res.status(400).json({
                     message:"Estado no válido",
