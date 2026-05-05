@@ -1,6 +1,5 @@
 const db = require('../config/db');
-const { get } = require('../routes/mascotasRoutes');
-const { getByUser } = require('./mascotaModel');
+
 
 const Cita = {
     //obtener todas la citas con el nombre de la mascota 

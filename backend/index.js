@@ -6,6 +6,7 @@ const db = require('./src/config/db');
 const mascotaRoutes = require('./src/routes/mascotasRoutes');
 const usuarioRoutes = require('./src/routes/usuarioRoutes');
 const citaRoutes = require('./src/routes/citaRoutes');
+const historialRoutes = require('./src/routes/historialRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -29,6 +30,7 @@ app.get('/test-db', async (req, res) => {
 app.use('/api/mascotas', mascotaRoutes);
 app.use('/api/usuarios', usuarioRoutes);
 app.use('/api/citas', citaRoutes);
+app.use('/api/historial', historialRoutes);
 
 app.listen(PORT, () =>{
     console.log(`Servidor corriendo en http://localhost:${PORT}`);
