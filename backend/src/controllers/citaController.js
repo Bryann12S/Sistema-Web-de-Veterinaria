@@ -45,7 +45,7 @@ const citaController = {
             const { estado } = req.body;
 
             //evitar esatdo que no existen en la BD
-            const opcionesValidadas = ['pendiente','completada', 'cancelada'];
+            const opcionesValidadas = ['pendiente','confirmada','completada', 'cancelada'];
             if (!estado || !opcionesValidadas.includes(estado.toLowerCase().trim())) {
                 return res.status(400).json({
                     message:"Estado no válido",
