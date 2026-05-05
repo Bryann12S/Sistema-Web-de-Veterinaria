@@ -49,6 +49,13 @@ const Historial = {
         ]);
 
         return result.insertId;
+    },
+    // Obtener hitorial por dueño
+    getDuenio: async (mascotaId) => {
+        const [rows] = await db.query(`
+            SELECT user_id FROM mascotas WHERE id = ?`, [mascotaId]
+        );
+        return rows[0];
     }
 };
 

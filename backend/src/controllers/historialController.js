@@ -5,6 +5,16 @@ const historialController = {
     listarPorMascota: async (req, res) => {
         try {
             const idMascota = req.params.idMascota;
+            const {id: usuarioId, rol } = req.user;
+
+            if (rol === 'cliente') {
+                const mascota = await Historial.getDuenio(idMascota);
+
+                if (!mascota || mascota.user_id !== usuarioId) {
+                    return res.status(403).json({ message: "No tienes permiso para ver este historial" });
+                }
+            }
+
             const historial = await Historial.getByMascotaId(idMascota);
             res.json(historial);
         } catch (error) {
