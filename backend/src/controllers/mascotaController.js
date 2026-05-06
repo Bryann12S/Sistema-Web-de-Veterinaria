@@ -18,6 +18,20 @@ const mascotaController = {
             res.status(500).json({ error: error.message });
         }
     },
+    
+    //obtener una mascota por su ID
+    getById: async (req, res) => {
+        try {
+            const { id } = req.params;
+            const mascota = await Mascota.getById(id);
+            if (!mascota) {
+                return res.status(404).json({ error: "Mascota no encontrada" });
+            }
+            res.json(mascota);
+        } catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    },
     //registrar una nueva mascota 
     crear: async (req, res) => {
         try {
@@ -34,8 +48,19 @@ const mascotaController = {
     //Actualizar datos de una mascota
     actualizar: async (req, res) => {
         try {
-            const id = req.params.id;
-            await Mascota.actualizar(id, req.body);
+            const { id } = req.params;
+            const {id: userId, rol} = req.user; // Obtener el ID y rol del usuario desde el token
+            const {nombre, especie, raza} = req.body; // Obtener los datos a actualizar
+
+            const mascota = await Mascota.getById(id); // Obtener la mascota por su ID
+            if (!mascota) {
+                return res.status(404).json({ error: "Mascota no encontrada" });
+            }
+            if (rol === 'cliente' && mascota.user_id !== userId) { // Verificar si el usuario es cliente y dueño de la mascota
+                return res.status(403).json({ error: "No tienes permiso para actualizar esta mascota" });
+            }
+
+            await Mascota.actualizar(id, { nombre, especie, raza, user_id: mascota.user_id }); // Actualizar la mascota con los datos proporcionados
             res.json({ message: "Mascota actualizada exitosamente" });
         } catch (error) {
             res.status(500).json({ error: "Error al actualizar la mascota: " + error.message });
@@ -44,7 +69,19 @@ const mascotaController = {
     //eliminar mascota
     eliminar: async (req, res)=>{
         try{
-            const id = req.params.id;
+            const {id} = req.params;
+            const {id: userId, rol} = req.user; // Obtener el ID y rol del usuario desde el token
+            
+            const mascota = await Mascota.getById(id); // Obtener la mascota por su ID
+            
+            if (!mascota) { 
+                return res.status(404).json({ error: "Mascota no encontrada" });
+            }
+
+            if (rol !== 'admin' && mascota.user_id !== userId) { // Verificar si el usuario es admin o dueño de la mascota
+                return res.status(403).json({ error: "No tienes permiso para eliminar esta mascota" });
+            }
+
             await Mascota.eliminar(id);
             res.json({ message: "Mascota eliminada exitosamente" });
         } catch (error){

@@ -8,6 +8,7 @@ const { authorize } = require('../middlewares/roleMiddleware');
 
 router.get('/', verificacionToken, mascotaController.listar);
 router.post('/', verificacionToken, mascotaController.crear);
+router.get('/:id', verificacionToken, mascotaController.getById);
 
 // Actualizar y eliminar solo para personal autorizado ; admin o veterinarios
 router.put('/:id', verificacionToken, authorize('admin', 'veterinario'), mascotaController.actualizar);

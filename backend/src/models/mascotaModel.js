@@ -6,6 +6,11 @@ const Mascota = {
         const [rows] = await db.query('SELECT m.*, u.nombre AS duenio_nombre FROM mascotas m JOIN usuarios u ON m.user_id = u.id');
         return rows;
     },
+    getById: async (id) => {
+        const [rows] = await db.query('SELECT * FROM mascotas WHERE id = ?', [id]);
+        return rows[0];
+    }
+    ,
     getByUser: async (userId) => {
         const [rows] = await db.query('SELECT * FROM mascotas WHERE user_id = ?', [userId]);
         return rows;
