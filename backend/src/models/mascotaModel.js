@@ -2,7 +2,8 @@ const db = require('../config/db');
 
 const Mascota = {
     getAll: async () => {
-        const [rows] = await db.query('SELECT * FROM mascotas');
+        //const [rows] = await db.query('SELECT * FROM mascotas');
+        const [rows] = await db.query('SELECT m.*, u.nombre AS duenio_nombre FROM mascotas m JOIN usuarios u ON m.user_id = u.id');
         return rows;
     },
     getByUser: async (userId) => {
