@@ -3,7 +3,10 @@
     <div class="col-md-6">
       <div class="card shadow-lg border-0">
         <div class="card-header bg-primary text-white py-3">
-          <h4 class="mb-0"><i class="bi bi-plus-circle me-2"></i>Registrar Mascota</h4>
+          <h4 class="mb-0">
+            <i class="bi" [ngClass]="isEditMode ? 'bi-pencil-square' : 'bi-plus-circle'"></i>
+            {{ isEditMode ? 'Editar Información de ' + mascotaForm.get('nombre')?.value : 'Registrar Nueva Mascota' }}
+          </h4>
         </div>
         <div class="card-body p-4">
           <form [formGroup]="mascotaForm" (ngSubmit)="onSubmit()">
@@ -36,9 +39,9 @@
 
             <div class="d-grid gap-2 mt-4">
               <button type="submit" [disabled]="mascotaForm.invalid" class="btn btn-primary btn-lg">
-                Guardar Mascota
+                {{ isEditMode ? 'Guardar Cambios' : 'Registrar Mascota' }}
               </button>
-              <a routerLink="/mascotas" class="btn btn-link text-muted text-decoration-none">Cancelar</a>
+              <a routerLink="/app/mascotas-list" class="btn btn-link text-muted text-decoration-none">Cancelar</a>
             </div>
 
           </form>

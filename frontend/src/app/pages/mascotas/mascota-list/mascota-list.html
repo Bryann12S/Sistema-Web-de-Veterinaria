@@ -28,14 +28,24 @@
             <td><span class="badge bg-info text-dark">{{ mascota.especie }}</span></td>
             <td>{{ mascota.raza }}</td>
             <td *ngIf="rol !== 'cliente'">{{ mascota.duenio_nombre || 'Ver en detalle' }}</td>
-            <td>
-              <button class="btn btn-sm btn-outline-primary me-2" [routerLink]="['/historial', mascota.id]">
-                <i class="bi bi-file-earmark-medical"></i> Historial
-              </button>
-              <button class="btn btn-sm btn-outline-secondary" *ngIf="rol === 'admin' || rol === 'cliente'">
-                <i class="bi bi-pencil"></i>
-              </button>
-            </td>
+            <td class="text-center">
+              <div class="btn-group">
+                <button class="btn btn-sm btn-outline-primary" [routerLink]="['/historial', mascota.id]">
+                  <i class="bi bi-file-medical"></i>
+                </button>
+
+                <button class="btn btn-sm btn-outline-warning" 
+                        [routerLink]="['/app/mascotas/editar', mascota.id]">
+                  <i class="bi bi-pencil-square"></i>
+                </button>
+
+                <button class="btn btn-sm btn-outline-danger" 
+                        *ngIf="rol === 'admin'"
+                        (click)="eliminarMascota(mascota.id)">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </div>
+          </td>
           </tr>
           <tr *ngIf="mascotas.length === 0">
             <td colspan="5" class="text-center py-4 text-muted">No se encontraron mascotas registradas.</td>

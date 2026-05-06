@@ -44,4 +44,19 @@ export class MascotaList implements OnInit {
       }
     });
   }
+
+  eliminarMascota(id: string) {
+    if (confirm('¿Estás seguro de que deseas eliminar esta mascota?')) {
+      this.mascotaService.eliminarMascota(id).subscribe({
+        next: () => {
+          this.mascotas = this.mascotas.filter(mascota => mascota.id !== id);
+          alert('Mascota eliminada correctamente');
+          this.cargarMascotas(); // Recarga la lista después de eliminar
+        },
+        error: (err) => {
+          console.error('Error al eliminar mascota:', err);
+        }
+      });
+    }
+  }
 }

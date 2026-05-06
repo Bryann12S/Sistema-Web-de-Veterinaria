@@ -19,7 +19,8 @@ export const routes: Routes = [
         children: [
             {path: 'dashboard', component: Dashboard},
             {path: 'mascotas-list', component: MascotaList},
-            {path: 'mascotas-form', component: MascotaForm}
+            {path: 'mascotas-form', component: MascotaForm},
+            {path: 'mascotas/editar/:id', component: MascotaForm}
         ]
     },
     { path: '**', redirectTo: 'login' }

@@ -14,7 +14,20 @@ export class Mascota {
     return this.http.get(this.API_URL);
   }
 
+
   crearMascota(mascota: any): Observable<any> {
     return this.http.post(this.API_URL, mascota);
+  }
+
+  actualizarMascota(id: string, mascota: any): Observable<any> {
+    return this.http.put(`${this.API_URL}/${id}`, mascota);
+  }
+
+  getMascotaById(id: string): Observable<any> {
+    return this.http.get(`${this.API_URL}/${id}`);
+  }
+  
+  eliminarMascota(id: string): Observable<any> {
+    return this.http.delete(`${this.API_URL}/${id}`);
   }
 }
