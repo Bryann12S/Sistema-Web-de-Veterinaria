@@ -1,1 +1,49 @@
-<p>mascota-form works!</p>
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="card shadow-lg border-0">
+        <div class="card-header bg-primary text-white py-3">
+          <h4 class="mb-0"><i class="bi bi-plus-circle me-2"></i>Registrar Mascota</h4>
+        </div>
+        <div class="card-body p-4">
+          <form [formGroup]="mascotaForm" (ngSubmit)="onSubmit()">
+            
+            <!-- Nombre -->
+            <div class="mb-3">
+              <label class="form-label fw-bold">Nombre de la Mascota</label>
+              <input type="text" formControlName="nombre" class="form-control" 
+                     [class.is-invalid]="mascotaForm.get('nombre')?.touched && mascotaForm.get('nombre')?.invalid"
+                     placeholder="Ej. Zeus">
+            </div>
+
+            <!-- Especie -->
+            <div class="mb-3">
+              <label class="form-label fw-bold">Especie</label>
+              <select formControlName="especie" class="form-select"
+                      [class.is-invalid]="mascotaForm.get('especie')?.touched && mascotaForm.get('especie')?.invalid">
+                <option value="" disabled selected>Selecciona una especie</option>
+                <option *ngFor="let esp of especies" [value]="esp">{{ esp }}</option>
+              </select>
+            </div>
+
+            <!-- Raza -->
+            <div class="mb-3">
+              <label class="form-label fw-bold">Raza</label>
+              <input type="text" formControlName="raza" class="form-control" 
+                     [class.is-invalid]="mascotaForm.get('raza')?.touched && mascotaForm.get('raza')?.invalid"
+                     placeholder="Ej. Labrador, Mestizo...">
+            </div>
+
+            <div class="d-grid gap-2 mt-4">
+              <button type="submit" [disabled]="mascotaForm.invalid" class="btn btn-primary btn-lg">
+                Guardar Mascota
+              </button>
+              <a routerLink="/mascotas" class="btn btn-link text-muted text-decoration-none">Cancelar</a>
+            </div>
+
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

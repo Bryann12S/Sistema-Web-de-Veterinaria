@@ -13,4 +13,8 @@ export class Mascota {
   getMascotas(): Observable<any> {
     return this.http.get(this.API_URL);
   }
+
+  crearMascota(mascota: any): Observable<any> {
+    return this.http.post(this.API_URL, mascota);
+  }
 }

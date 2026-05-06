@@ -13,11 +13,9 @@ export class Auth {
   login(credentials: any){
     return this.http.post(`${this.API_URL}/login`, credentials).pipe(
       tap((res: any) => {
-        console.log('Respuesta completa del servidor:', res);
         if (res.token) {
           localStorage.setItem('token', res.token);
           localStorage.setItem('user', JSON.stringify(res.usuario)); //Buscamos los datos
-          console.log('Usuario guardado correctamente:', res.usuario);
         }
       })
     );
@@ -29,7 +27,6 @@ export class Auth {
 
   getRol(){
     const data = localStorage.getItem('user');
-    console.log('Data bruta de localStorage:', data);
     if (data && data !== 'undefined'){
       try{
         const user = JSON.parse(data);

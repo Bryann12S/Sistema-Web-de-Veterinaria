@@ -5,7 +5,7 @@
       {{ rol === 'cliente' ? 'Mis Mascotas' : 'Pacientes Registrados' }}
     </h2>
     <!-- Solo el cliente o admin puede registrar mascotas nuevas según tu lógica -->
-    <button class="btn btn-success" *ngIf="rol !== 'veterinario'">
+    <button class="btn btn-success" *ngIf="rol !== 'veterinario'" [routerLink]="['/app/mascotas-form']">
       <i class="bi bi-plus-lg"></i> Nueva Mascota
     </button>
   </div>
