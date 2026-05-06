@@ -1,15 +1,30 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Router, RouterLink } from '@angular/router';
+import { Auth } from '../../services/auth';
 
 
 @Component({
   selector: 'app-navbar',
-  imports: [],
+  imports: [CommonModule, RouterLink],
   templateUrl: './navbar.html',
   styleUrl: './navbar.css',
 })
-export class Navbar {
+export class Navbar implements OnInit {
+    rol: string | null = null;
+
+    constructor(private authService: Auth, private router: Router) {}
+    
+    ngOnInit() {
+        this.rol = this.authService.getRol();
+    }
+
+    isLoggedIn(): boolean {
+        return !!this.authService.getRol();
+    }
+    
     logout() {
-        localStorage.removeItem('token');
-        window.location.href = '/login';
+        this.authService.logaut();
+        this.router.navigate(['/login']);
     }
 }

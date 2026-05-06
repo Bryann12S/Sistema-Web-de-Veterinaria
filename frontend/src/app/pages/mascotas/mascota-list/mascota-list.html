@@ -1,1 +1,47 @@
-<p>mascota-list works!</p>
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold text-primary">
+      <i class="bi bi-dog"></i> 
+      {{ rol === 'cliente' ? 'Mis Mascotas' : 'Pacientes Registrados' }}
+    </h2>
+    <!-- Solo el cliente o admin puede registrar mascotas nuevas según tu lógica -->
+    <button class="btn btn-success" *ngIf="rol !== 'veterinario'">
+      <i class="bi bi-plus-lg"></i> Nueva Mascota
+    </button>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="card-body p-0">
+      <table class="table table-hover mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Nombre</th>
+            <th>Especie</th>
+            <th>Raza</th>
+            <th *ngIf="rol !== 'cliente'">Dueño</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let mascota of mascotas">
+            <td class="fw-bold">{{ mascota.nombre }}</td>
+            <td><span class="badge bg-info text-dark">{{ mascota.especie }}</span></td>
+            <td>{{ mascota.raza }}</td>
+            <td *ngIf="rol !== 'cliente'">{{ mascota.duenio_nombre || 'Ver en detalle' }}</td>
+            <td>
+              <button class="btn btn-sm btn-outline-primary me-2" [routerLink]="['/historial', mascota.id]">
+                <i class="bi bi-file-earmark-medical"></i> Historial
+              </button>
+              <button class="btn btn-sm btn-outline-secondary" *ngIf="rol === 'admin' || rol === 'cliente'">
+                <i class="bi bi-pencil"></i>
+              </button>
+            </td>
+          </tr>
+          <tr *ngIf="mascotas.length === 0">
+            <td colspan="5" class="text-center py-4 text-muted">No se encontraron mascotas registradas.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

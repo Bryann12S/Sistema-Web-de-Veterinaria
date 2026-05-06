@@ -38,6 +38,7 @@ export class Login {
   
   ngOnInit() {
     const token = localStorage.getItem('token');
+    console.log('Token en localStorage:', token);
     if (token) {
       this.router.navigate(['/app/dashboard']);
     }
