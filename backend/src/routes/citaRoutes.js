@@ -5,7 +5,7 @@ const { verificacionToken } = require('../middlewares/authMiddleware');
 const { authorize } = require('../middlewares/roleMiddleware');
 
 //Defincion de rutas apuntando al controller
-router.get('/', verificacionToken, authorize('admin', 'veterinario'), citaController.listar);
+router.get('/', verificacionToken, authorize('admin', 'veterinario', 'cliente'), citaController.listar);
 router.post('/', verificacionToken, authorize('cliente'), citaController.crear);
 router.put('/:id/estado', verificacionToken, authorize('admin', 'veterinario'), citaController.actualizarEstado);
 
