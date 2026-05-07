@@ -4,29 +4,53 @@
       <div class="mb-3">
         <label class="form-label">Selecciona tu Mascota</label>
         <select formControlName="mascota_id" class="form-select">
+          <option value="" disabled>-- Selecciona una mascota --</option>
           <option *ngFor="let m of misMascotas" [value]="m.id">{{ m.nombre }}</option>
         </select>
+        <div *ngIf="citaForm.get('mascota_id')?.invalid && citaForm.get('mascota_id')?.touched" class="text-danger small mt-1">
+          Debes seleccionar una mascota.
+        </div>
       </div>
       
       <div class="row">
         <div class="col-md-6 mb-3">
           <label class="form-label">Fecha</label>
           <input type="date" formControlName="fecha" class="form-control">
+          <div *ngIf="citaForm.get('fecha')?.invalid && citaForm.get('fecha')?.touched" class="text-danger small mt-1">
+            La fecha es requerida.
+          </div>
         </div>
         <div class="col-md-6 mb-3">
           <label class="form-label">Hora</label>
           <input type="time" formControlName="hora" class="form-control">
+          <div *ngIf="citaForm.get('hora')?.invalid && citaForm.get('hora')?.touched" class="text-danger small mt-1">
+            La hora es requerida.
+          </div>
         </div>
       </div>
 
       <div class="mb-3">
         <label class="form-label">Tipo de Consulta</label>
         <select formControlName="tipo_consulta" class="form-select">
+          <option value="" disabled>-- Selecciona un tipo --</option>
           <option *ngFor="let tipo of tiposConsulta" [value]="tipo">{{ tipo }}</option>
         </select>
+        <div *ngIf="citaForm.get('tipo_consulta')?.invalid && citaForm.get('tipo_consulta')?.touched" class="text-danger small mt-1">
+          El tipo de consulta es requerido.
+        </div>
       </div>
 
-      <button type="submit" class="btn btn-primary w-100">Solicitar Cita</button>
+      <div class="mb-3">
+        <label class="form-label">Motivo de la consulta</label>
+        <textarea formControlName="motivo" class="form-control" rows="3" placeholder="Describe brevemente el motivo de la cita..."></textarea>
+        <div *ngIf="citaForm.get('motivo')?.invalid && citaForm.get('motivo')?.touched" class="text-danger small mt-1">
+          El motivo es requerido.
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary w-100" [disabled]="citaForm.invalid">
+        Solicitar Cita
+      </button>
     </form>
   </div>
 </div>

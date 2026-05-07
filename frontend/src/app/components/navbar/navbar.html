@@ -18,25 +18,35 @@
         
         <!-- Opción Dinámica: Mis Mascotas / Lista de Pacientes -->
         <li class="nav-item">
-          <a class="nav-link active d-flex align-items-center" routerLinkActive="active" routerLink="/app/mascotas-list">
+          <a class="nav-link d-flex align-items-center" routerLinkActive="active" routerLink="/app/mascotas-list">
             <i class="bi bi-list-ul me-1"></i>
             {{ rol === 'cliente' ? 'Mis Mascotas' : 'Lista de Pacientes' }}
           </a>
         </li>
 
-        <!-- Ejemplo de cómo agregar más opciones a futuro -->
-        <!-- 
-        <li class="nav-item">
-          <a class="nav-link" routerLink="/app/citas">
-            <i class="bi bi-calendar-event me-1"></i> Citas
+        <!-- Citas: Cliente puede agendar y ver sus citas -->
+        <li class="nav-item" *ngIf="rol === 'cliente'">
+          <a class="nav-link d-flex align-items-center" routerLinkActive="active" routerLink="/app/cita-form">
+            <i class="bi bi-calendar-plus me-1"></i> Agendar Cita
           </a>
-        </li> 
-        -->
+        </li>
+        <li class="nav-item" *ngIf="rol === 'cliente'">
+          <a class="nav-link d-flex align-items-center" routerLinkActive="active" routerLink="/app/cita-list">
+            <i class="bi bi-calendar2-check me-1"></i> Mis Citas
+          </a>
+        </li>
+
+        <li class="nav-item" *ngIf="rol === 'admin' || rol === 'veterinario'">
+          <a class="nav-link d-flex align-items-center" routerLinkActive="active" routerLink="/app/cita-list">
+            <i class="bi bi-calendar-check me-1"></i> Gestionar Citas
+          </a>
+        </li>
+
       </ul>
 
       <!-- Opciones del lado DERECHO -->
       <div class="navbar-nav ms-auto align-items-center">
-        <!-- Indicador de Rol (Opcional, se ve bien para saber quién está logueado) -->
+        <!-- Indicador de Rol -->
         <span class="navbar-text me-3 text-white-50 d-none d-lg-inline" *ngIf="isLoggedIn()">
           <small><i class="bi bi-person-circle"></i> {{ rol | titlecase }}</small>
         </span>

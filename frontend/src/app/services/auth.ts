@@ -21,8 +21,25 @@ export class Auth {
     );
   }
 
-  logaut() {
-    localStorage.clear();
+  logout() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+  }
+
+  getToken(): string | null {
+    return localStorage.getItem('token');
+  }
+
+  getUser(): { id: number; nombre: string; rol: string } | null {
+    const data = localStorage.getItem('user');
+    if (data && data !== 'undefined') {
+      try {
+        return JSON.parse(data);
+      } catch (e) {
+        return null;
+      }
+    }
+    return null;
   }
 
   getRol(){

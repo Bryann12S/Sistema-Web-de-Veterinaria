@@ -15,7 +15,7 @@ import {Mascota} from '../../../services/mascota'
 })
 export class CitaForm implements OnInit {
   citaForm: FormGroup;
-  tiposConsulta = ['General', 'Vacunación', 'Desparacitación', 'Cirugía', 'Urgencia', 'Estética', 'Control']
+  tiposConsulta = ['General', 'Vacunación', 'Desparasitación', 'Cirugía', 'Urgencia', 'Estética', 'Control']
   misMascotas: any[] = [];
 
   constructor(
@@ -41,8 +41,8 @@ export class CitaForm implements OnInit {
     if (this.citaForm.valid) {
       this.citaService.agendarCita(this.citaForm.value).subscribe({
         next: () => {
-          alert('Cita solicitada');
-          this.router.navigate(['app/cita-form']);
+          alert('Cita solicitada exitosamente');
+          this.router.navigate(['app/cita-list']);
         },
         error: (err) => console.error(err)
       });
