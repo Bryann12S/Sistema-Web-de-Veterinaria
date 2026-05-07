@@ -1,0 +1,35 @@
+<table class="table align-middle">
+  <thead>
+    <tr>
+      <th>Fecha/Hora</th>
+      <th>Mascota</th>
+      <th>Tipo</th>
+      <th>Estado</th>
+      <th>Acciones</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let cita of citas">
+      <td>{{ cita.fecha | date:'dd/MM/yyyy' }} - {{ cita.hora }}</td>
+      <td>{{ cita.mascota_nombre }}</td>
+      <td><span class="badge bg-secondary">{{ cita.tipo_consulta }}</span></td>
+      <td>
+        <span class="badge" [ngClass]="{
+          'bg-warning': cita.estado === 'pendiente',
+          'bg-info': cita.estado === 'confirmada',
+          'bg-success': cita.estado === 'completada',
+          'bg-danger': cita.estado === 'cancelada'
+        }">{{ cita.estado }}</span>
+      </td>
+      <td>
+        <button *ngIf="cita.estado === 'pendiente'" 
+                (click)="actualizarEstado(cita.id, 'confirmada')" 
+                class="btn btn-sm btn-success me-1">Confirmar</button>
+        
+        <button *ngIf="cita.estado === 'confirmada'" 
+                (click)="actualizarEstado(cita.id, 'completada')" 
+                class="btn btn-sm btn-primary me-1">Finalizar</button>
+      </td>
+    </tr>
+  </tbody>
+</table>
