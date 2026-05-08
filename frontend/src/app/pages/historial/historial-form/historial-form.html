@@ -1,0 +1,52 @@
+<div class="card shadow border-0">
+  <div class="card-body">
+    <form [formGroup]="historialForm" (ngSubmit)="onCrear()">
+      <div class="mb-3">
+        <label class="form-label">Selecciona la Mascota</label>
+        <select formControlName="mascota_id" class="form-select">
+          <option value="" disabled>-- Selecciona una mascota --</option>
+          <option *ngFor="let m of mascotas" [value]="m.id">{{ m.nombre }}</option>
+        </select>
+        <div *ngIf="historialForm.get('mascota_id')?.invalid && historialForm.get('mascota_id')?.touched" class="text-danger small mt-1">
+          Debes seleccionar una mascota.
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Cita Asociada (opcional)</label>
+        <select formControlName="cita_id" class="form-select">
+          <option value="">-- Sin cita asociada --</option>
+          <option *ngFor="let c of citas" [value]="c.id">{{ c.fecha | date:'dd/MM/yyyy' }} - {{ c.nombre_mascota }} - {{ c.motivo }}</option>
+        </select>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Motivo</label>
+        <input type="text" formControlName="motivo" class="form-control" placeholder="Motivo de la consulta">
+        <div *ngIf="historialForm.get('motivo')?.invalid && historialForm.get('motivo')?.touched" class="text-danger small mt-1">
+          El motivo es requerido.
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Descripción</label>
+        <textarea formControlName="descripcion" class="form-control" rows="3" placeholder="Describe el diagnóstico o hallazgos..."></textarea>
+        <div *ngIf="historialForm.get('descripcion')?.invalid && historialForm.get('descripcion')?.touched" class="text-danger small mt-1">
+          La descripción es requerida.
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Tratamiento</label>
+        <textarea formControlName="tratamiento" class="form-control" rows="3" placeholder="Tratamiento prescrito..."></textarea>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Observaciones</label>
+        <textarea formControlName="observaciones" class="form-control" rows="3" placeholder="Observaciones adicionales..."></textarea>
+      </div>
+
+      <button type="submit" class="btn btn-primary" [disabled]="historialForm.invalid">Crear Historial</button>
+    </form>
+  </div>
+</div>

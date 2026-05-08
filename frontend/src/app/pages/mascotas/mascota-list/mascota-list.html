@@ -30,7 +30,7 @@
             <td *ngIf="rol !== 'cliente'">{{ mascota.duenio_nombre || 'Ver en detalle' }}</td>
             <td class="text-center">
               <div class="btn-group">
-                <button class="btn btn-sm btn-outline-primary" [routerLink]="['/historial', mascota.id]">
+                <button class="btn btn-sm btn-outline-primary" [routerLink]="['/app/historial-list', mascota.id]">
                   <i class="bi bi-file-medical"></i>
                 </button>
 

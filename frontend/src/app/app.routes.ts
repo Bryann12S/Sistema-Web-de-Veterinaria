@@ -9,6 +9,8 @@ import { MascotaList } from './pages/mascotas/mascota-list/mascota-list';
 import { MascotaForm } from './pages/mascotas/mascota-form/mascota-form';
 import { CitaForm } from './pages/cita/cita-form/cita-form';
 import { CitaList } from './pages/cita/cita-list/cita-list';
+import { HistorialForm } from './pages/historial/historial-form/historial-form';
+import { HistorialList } from './pages/historial/historial-list/historial-list';
 
 
 export const routes: Routes = [
@@ -38,6 +40,20 @@ export const routes: Routes = [
                 path: 'cita-list',
                 component: CitaList,
                 canActivate: [roleGuard('cliente', 'veterinario', 'admin')]
+            },
+
+            // Historial: lista por mascota
+            {
+                path: 'historial-list/:id',
+                component: HistorialList,
+                canActivate: [roleGuard('cliente', 'veterinario', 'admin')]
+            },
+
+            // Historial: crear → veterinario y admin
+            {
+                path: 'historial-form',
+                component: HistorialForm,
+                canActivate: [roleGuard('veterinario', 'admin')]
             },
         ]
     },

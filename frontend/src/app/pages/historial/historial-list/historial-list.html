@@ -1,0 +1,46 @@
+<!-- Estado de carga -->
+<div *ngIf="cargando" class="text-center py-4">
+  <div class="spinner-border text-primary" role="status">
+    <span class="visually-hidden">Cargando...</span>
+  </div>
+</div>
+
+<!-- Mensaje de error -->
+<div *ngIf="errorMsg" class="alert alert-danger">{{ errorMsg }}</div>
+
+<!-- Lista de historial -->
+<ng-container *ngIf="!cargando && !errorMsg">
+  <h5 class="mb-3">📋 Historial Médico</h5>
+
+  <div *ngIf="historial.length === 0" class="alert alert-info">
+    No hay registros en el historial médico.
+  </div>
+
+  <div class="table-responsive" *ngIf="historial.length > 0">
+    <table class="table table-hover align-middle">
+      <thead class="table-light">
+        <tr>
+          <th>Fecha</th>
+          <th>Motivo</th>
+          <th>Descripción</th>
+          <th>Tratamiento</th>
+          <th>Observaciones</th>
+          <th>Cita Asociada</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let entry of historial">
+          <td>{{ entry.fecha | date:'dd/MM/yyyy' }}</td>
+          <td>{{ entry.motivo }}</td>
+          <td>{{ entry.descripcion }}</td>
+          <td>{{ entry.tratamiento }}</td>
+          <td>{{ entry.observaciones }}</td>
+          <td>
+            <span *ngIf="entry.cita_fecha">{{ entry.cita_fecha | date:'dd/MM/yyyy' }} {{ entry.cita_hora }}</span>
+            <span *ngIf="!entry.cita_fecha">-</span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</ng-container>
