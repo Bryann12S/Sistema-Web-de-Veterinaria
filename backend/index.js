@@ -7,6 +7,7 @@ const mascotaRoutes = require('./src/routes/mascotasRoutes');
 const usuarioRoutes = require('./src/routes/usuarioRoutes');
 const citaRoutes = require('./src/routes/citaRoutes');
 const historialRoutes = require('./src/routes/historialRoutes');
+const vacunasRoutes = require('./src/routes/vacunasRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -31,6 +32,7 @@ app.use('/api/mascotas', mascotaRoutes);
 app.use('/api/usuarios', usuarioRoutes);
 app.use('/api/citas', citaRoutes);
 app.use('/api/historial', historialRoutes);
+app.use('/api/vacunas', vacunasRoutes);
 
 app.listen(PORT, () =>{
     console.log(`Servidor corriendo en http://localhost:${PORT}`);
