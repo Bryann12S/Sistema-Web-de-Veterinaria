@@ -35,11 +35,27 @@ const mascotaController = {
     //registrar una nueva mascota 
     crear: async (req, res) => {
         try {
-            const userIdToken = req.user.id; // Obtener el ID del usuario desde el token
-            //const id = await Mascota.crear(req.body);
-            const datosMascota = { ...req.body, user_id: userIdToken }; // Agregar el ID del usuario a los datos de la mascota
+            const userIdToken = req.user.id;
+            const { nombre, especie, raza, sexo, color, peso, fecha_nacimiento, esterilizado, foto } = req.body;
             
-            const id = await Mascota.crear(datosMascota); // Crear la mascota con los datos completos
+            if (!nombre || !especie || !raza) {
+                return res.status(400).json({ error: "Nombre, especie y raza son obligatorios" });
+            }
+            
+            const datosMascota = {
+                nombre,
+                especie,
+                raza,
+                sexo: sexo || null,
+                color: color || null,
+                peso: peso || null,
+                fecha_nacimiento: fecha_nacimiento || null,
+                esterilizado: esterilizado || 0,
+                foto: foto || null,
+                user_id: userIdToken
+            };
+            
+            const id = await Mascota.crear(datosMascota);
             res.status(201).json({ message: "Mascota creada exitosamente", id });
         } catch (error) {
             res.status(500).json({ error: "Error al crear la mascota: " + error.message });
@@ -49,18 +65,31 @@ const mascotaController = {
     actualizar: async (req, res) => {
         try {
             const { id } = req.params;
-            const {id: userId, rol} = req.user; // Obtener el ID y rol del usuario desde el token
-            const {nombre, especie, raza} = req.body; // Obtener los datos a actualizar
+            const {id: userId, rol} = req.user;
+            const { nombre, especie, raza, sexo, color, peso, fecha_nacimiento, esterilizado, foto } = req.body;
 
-            const mascota = await Mascota.getById(id); // Obtener la mascota por su ID
+            const mascota = await Mascota.getById(id);
             if (!mascota) {
                 return res.status(404).json({ error: "Mascota no encontrada" });
             }
-            if (rol === 'cliente' && mascota.user_id !== userId) { // Verificar si el usuario es cliente y dueño de la mascota
+            if (rol === 'cliente' && mascota.user_id !== userId) {
                 return res.status(403).json({ error: "No tienes permiso para actualizar esta mascota" });
             }
 
-            await Mascota.actualizar(id, { nombre, especie, raza, user_id: mascota.user_id }); // Actualizar la mascota con los datos proporcionados
+            const datosMascota = {
+                nombre: nombre || mascota.nombre,
+                especie: especie || mascota.especie,
+                raza: raza || mascota.raza,
+                sexo: sexo !== undefined ? sexo : mascota.sexo,
+                color: color || mascota.color,
+                peso: peso || mascota.peso,
+                fecha_nacimiento: fecha_nacimiento || mascota.fecha_nacimiento,
+                esterilizado: esterilizado !== undefined ? esterilizado : mascota.esterilizado,
+                foto: foto || mascota.foto,
+                user_id: mascota.user_id
+            };
+
+            await Mascota.actualizar(id, datosMascota);
             res.json({ message: "Mascota actualizada exitosamente" });
         } catch (error) {
             res.status(500).json({ error: "Error al actualizar la mascota: " + error.message });

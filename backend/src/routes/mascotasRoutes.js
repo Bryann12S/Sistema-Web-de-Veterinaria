@@ -4,14 +4,19 @@ const mascotaController = require('../controllers/mascotaController');
 const { verificacionToken } = require('../middlewares/authMiddleware');
 const { authorize } = require('../middlewares/roleMiddleware');
 
-//Defincion de rutas apuntando al controller
-
+// Listar mascotas
 router.get('/', verificacionToken, mascotaController.listar);
-router.post('/', verificacionToken, mascotaController.crear);
+
+// Crear mascota (cliente)
+router.post('/', verificacionToken, authorize('cliente'), mascotaController.crear);
+
+// Obtener mascota por ID
 router.get('/:id', verificacionToken, mascotaController.getById);
 
-// Actualizar y eliminar solo para personal autorizado ; admin o veterinarios
-router.put('/:id', verificacionToken, authorize('admin', 'veterinario'), mascotaController.actualizar);
-router.delete('/:id', verificacionToken, authorize('admin'), mascotaController.eliminar);
+// Actualizar mascota (dueño o admin)
+router.put('/:id', verificacionToken, mascotaController.actualizar);
+
+// Eliminar mascota (dueño o admin)
+router.delete('/:id', verificacionToken, mascotaController.eliminar);
 
 module.exports = router;
