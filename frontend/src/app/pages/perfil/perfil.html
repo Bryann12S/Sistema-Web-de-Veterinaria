@@ -1,13 +1,22 @@
 <div class="container py-4">
   <div class="row justify-content-center">
     <div class="col-md-8">
-      <div class="card shadow-sm border-0 rounded-4">
+      
+      <!-- PANTALLA DE CARGA -->
+      <div *ngIf="isLoading" class="text-center py-5 mt-5">
+        <div class="spinner-border text-primary" role="status" style="width: 3.5rem; height: 3.5rem;">
+          <span class="visually-hidden">Cargando...</span>
+        </div>
+        <h5 class="mt-3 fw-bold text-muted">Cargando tus datos...</h5>
+      </div>
+
+      <!-- FORMULARIO -->
+      <div class="card shadow-sm border-0 rounded-4" *ngIf="!isLoading">
         <div class="card-header bg-white border-0 pt-4 pb-0 text-center">
           <h3 class="fw-bold text-primary"><i class="bi bi-person-lines-fill"></i> Mi Perfil</h3>
           <p class="text-muted">Completa tu información para un mejor servicio</p>
         </div>
         <div class="card-body p-4">
-          <div *ngIf="successMessage" class="alert alert-success">{{ successMessage }}</div>
           <div *ngIf="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
 
           <form (ngSubmit)="actualizarPerfil()">
@@ -38,7 +47,8 @@
               </div>
               <div class="col-md-6 mb-3">
                 <label class="form-label">Cédula</label>
-                <input type="text" name="cedula" class="form-control" placeholder="Ej. 1712345678" [(ngModel)]="usuario.cedula">
+                <input type="text" name="cedula" class="form-control" placeholder="Ej. 1712345678" [(ngModel)]="usuario.cedula" [disabled]="cedulaExistente">
+                <small class="text-muted" *ngIf="cedulaExistente">La cédula no se puede cambiar una vez registrada.</small>
               </div>
               <div class="col-md-6 mb-3">
                 <label class="form-label">Teléfono</label>
@@ -80,6 +90,20 @@
             </div>
           </form>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AVISO TOAST -->
+  <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1055">
+    <div class="toast align-items-center text-white bg-success border-0 shadow-lg" 
+         [class.show]="showToast" role="alert" aria-live="assertive" aria-atomic="true" 
+         style="transition: opacity 0.3s ease-in-out; opacity: {{showToast ? 1 : 0}}; pointer-events: {{showToast ? 'auto' : 'none'}};">
+      <div class="d-flex">
+        <div class="toast-body fw-bold">
+          <i class="bi bi-check-circle-fill me-2 fs-5 vertical-align-middle"></i> Perfil actualizado correctamente.
+        </div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" (click)="showToast = false" aria-label="Close"></button>
       </div>
     </div>
   </div>

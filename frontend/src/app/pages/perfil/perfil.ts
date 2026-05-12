@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { Auth } from '../../services/auth';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -15,8 +15,10 @@ import { CommonModule } from '@angular/common';
 })
 export class Perfil implements OnInit {
   usuario: any = {};
-  successMessage = '';
   errorMessage = '';
+  cedulaExistente = false;
+  isLoading = true;
+  showToast = false;
 
   // Provincias de Ecuador
   provincias = [
@@ -26,19 +28,27 @@ export class Perfil implements OnInit {
     'Sucumbíos', 'Tungurahua', 'Zamora Chinchipe'
   ];
 
-  constructor(private authService: Auth) {}
+  constructor(private authService: Auth, private cdr: ChangeDetectorRef) {}
 
   ngOnInit() {
     this.cargarPerfil();
   }
 
   cargarPerfil() {
+    this.isLoading = true;
     this.authService.getPerfil().subscribe({
       next: (data: any) => {
         this.usuario = data;
+        if (this.usuario.cedula) {
+          this.cedulaExistente = true;
+        }
+        this.isLoading = false;
+        this.cdr.detectChanges(); // Forzar actualización de vista
       },
       error: (err) => {
         console.error('Error al cargar perfil:', err);
+        this.isLoading = false;
+        this.cdr.detectChanges();
       }
     });
   }
@@ -46,13 +56,20 @@ export class Perfil implements OnInit {
   actualizarPerfil() {
     this.authService.actualizarPerfil(this.usuario).subscribe({
       next: () => {
-        this.successMessage = 'Perfil actualizado exitosamente.';
         this.errorMessage = '';
+        this.showToast = true;
+        this.cdr.detectChanges();
+        
+        // Ocultar toast después de 3 segundos
+        setTimeout(() => {
+          this.showToast = false;
+          this.cdr.detectChanges();
+        }, 3000);
       },
       error: (err) => {
         console.error('Error al actualizar perfil:', err);
-        this.errorMessage = 'Hubo un error al actualizar el perfil.';
-        this.successMessage = '';
+        this.errorMessage = err.error?.error || 'Hubo un error al actualizar el perfil.';
+        this.cdr.detectChanges();
       }
     });
   }
@@ -63,6 +80,7 @@ export class Perfil implements OnInit {
       const reader = new FileReader();
       reader.onload = (e: any) => {
         this.usuario.foto = e.target.result;
+        this.cdr.detectChanges();
       };
       reader.readAsDataURL(file);
     }
