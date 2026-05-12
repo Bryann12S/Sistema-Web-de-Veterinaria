@@ -167,7 +167,7 @@ const usuarioController = {
                 return res.status(401).json({ error: "Usuario no autenticado" });
             }
 
-            const { nombre, apellidos, cedula, telefono, provincia, canton, ciudad, comunidad, direccion } = req.body;
+            const { nombre, apellidos, cedula, telefono, provincia, canton, ciudad, comunidad, direccion, foto } = req.body;
 
             const usuario = await Usuario.buscarPorId(req.user.id);
             if (!usuario) {
@@ -183,7 +183,8 @@ const usuarioController = {
                 canton: canton || usuario.canton,
                 ciudad: ciudad || usuario.ciudad,
                 comunidad: comunidad || usuario.comunidad,
-                direccion: direccion || usuario.direccion
+                direccion: direccion || usuario.direccion,
+                foto: foto !== undefined ? foto : usuario.foto
             });
 
             res.json({ message: "Perfil actualizado exitosamente" });
