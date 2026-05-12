@@ -4,11 +4,13 @@ const historialController = require('../controllers/historialController');
 const { verificacionToken } = require('../middlewares/authMiddleware'); 
 const { authorize } = require('../middlewares/roleMiddleware');
 
+// ========== RUTAS DINÁMICAS ==========
+
 // Listar todos los historiales (admin, veterinario)
 router.get('/', verificacionToken, authorize('admin', 'veterinario'), historialController.listar);
 
-// Obtener historial por ID
-router.get('/:id', verificacionToken, historialController.getById);
+// Crear historial (veterinario o admin)
+router.post('/', verificacionToken, authorize('admin', 'veterinario'), historialController.crear);
 
 // Obtener historial por mascota
 router.get('/mascota/:mascotaId', verificacionToken, historialController.listarPorMascota);
@@ -16,8 +18,8 @@ router.get('/mascota/:mascotaId', verificacionToken, historialController.listarP
 // Obtener historial por veterinario
 router.get('/veterinario/:veterinarioId', verificacionToken, historialController.listarPorVeterinario);
 
-// Crear historial (veterinario o admin)
-router.post('/', verificacionToken, authorize('admin', 'veterinario'), historialController.crear);
+// Obtener historial por ID
+router.get('/:id', verificacionToken, historialController.getById);
 
 // Actualizar historial
 router.put('/:id', verificacionToken, authorize('admin', 'veterinario'), historialController.actualizar);

@@ -4,6 +4,8 @@ const mascotaController = require('../controllers/mascotaController');
 const { verificacionToken } = require('../middlewares/authMiddleware');
 const { authorize } = require('../middlewares/roleMiddleware');
 
+// ========== RUTAS DINÁMICAS ==========
+
 // Listar mascotas
 router.get('/', verificacionToken, mascotaController.listar);
 
