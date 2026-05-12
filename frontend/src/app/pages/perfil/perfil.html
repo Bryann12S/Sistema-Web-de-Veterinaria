@@ -22,8 +22,27 @@
           <form (ngSubmit)="actualizarPerfil()">
             <div class="text-center mb-4">
               <img [src]="usuario.foto || 'assets/img/default-avatar.png'" alt="Foto de perfil" class="rounded-circle mb-3 border shadow-sm" style="width: 120px; height: 120px; object-fit: cover;">
+              
+              <h4 class="fw-bold mb-1 text-dark">{{ usuario.nombre }} {{ usuario.apellidos }}</h4>
+              
+              <!-- Etiqueta de Rol / Ocupación -->
+              <span *ngIf="usuario.rol" class="badge rounded-pill mb-3 fs-6 px-3 py-2 shadow-sm" 
+                    [ngClass]="{
+                      'bg-success': usuario.rol === 'veterinario',
+                      'bg-danger': usuario.rol === 'admin',
+                      'bg-secondary': usuario.rol === 'cliente'
+                    }">
+                <i class="bi" 
+                   [ngClass]="{
+                     'bi-heart-pulse-fill': usuario.rol === 'veterinario',
+                     'bi-shield-lock-fill': usuario.rol === 'admin',
+                     'bi-person-fill': usuario.rol === 'cliente'
+                   }"></i>
+                {{ usuario.rol === 'veterinario' ? 'Veterinario' : (usuario.rol === 'admin' ? 'Administrador' : 'Cliente') }}
+              </span>
+
               <div>
-                <label for="fotoInput" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+                <label for="fotoInput" class="btn btn-outline-primary btn-sm rounded-pill px-3 mt-2">
                   <i class="bi bi-camera"></i> Cambiar Foto
                 </label>
                 <input type="file" id="fotoInput" class="d-none" accept="image/*" (change)="onFileChange($event)">
