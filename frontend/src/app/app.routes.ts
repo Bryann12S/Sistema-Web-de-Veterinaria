@@ -13,6 +13,7 @@ import { HistorialForm } from './pages/historial/historial-form/historial-form';
 import { HistorialList } from './pages/historial/historial-list/historial-list';
 import { Registro } from './pages/registro/registro';
 import { Perfil } from './pages/perfil/perfil';
+import { UsuariosList } from './pages/usuarios/usuarios-list/usuarios-list';
 
 
 export const routes: Routes = [
@@ -26,6 +27,7 @@ export const routes: Routes = [
         children: [
             { path: 'dashboard', component: Dashboard },
             { path: 'perfil', component: Perfil },
+            { path: 'usuarios-list', component: UsuariosList, canActivate: [roleGuard('admin')] },
 
             // Mascotas — todos los roles autenticados
             { path: 'mascotas-list', component: MascotaList },
