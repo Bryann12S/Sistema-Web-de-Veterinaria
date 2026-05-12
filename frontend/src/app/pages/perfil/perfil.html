@@ -1,0 +1,86 @@
+<div class="container py-4">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card shadow-sm border-0 rounded-4">
+        <div class="card-header bg-white border-0 pt-4 pb-0 text-center">
+          <h3 class="fw-bold text-primary"><i class="bi bi-person-lines-fill"></i> Mi Perfil</h3>
+          <p class="text-muted">Completa tu información para un mejor servicio</p>
+        </div>
+        <div class="card-body p-4">
+          <div *ngIf="successMessage" class="alert alert-success">{{ successMessage }}</div>
+          <div *ngIf="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
+
+          <form (ngSubmit)="actualizarPerfil()">
+            <div class="text-center mb-4">
+              <img [src]="usuario.foto || 'assets/img/default-avatar.png'" alt="Foto de perfil" class="rounded-circle mb-3 border shadow-sm" style="width: 120px; height: 120px; object-fit: cover;">
+              <div>
+                <label for="fotoInput" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+                  <i class="bi bi-camera"></i> Cambiar Foto
+                </label>
+                <input type="file" id="fotoInput" class="d-none" accept="image/*" (change)="onFileChange($event)">
+              </div>
+            </div>
+
+            <h5 class="border-bottom pb-2 mb-3 text-secondary">Información Básica</h5>
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Nombres</label>
+                <input type="text" name="nombre" class="form-control" [(ngModel)]="usuario.nombre" required>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Apellidos</label>
+                <input type="text" name="apellidos" class="form-control" [(ngModel)]="usuario.apellidos" required>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Correo Electrónico</label>
+                <input type="email" name="email" class="form-control" [(ngModel)]="usuario.email" disabled>
+                <small class="text-muted">El correo no se puede cambiar.</small>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Cédula</label>
+                <input type="text" name="cedula" class="form-control" placeholder="Ej. 1712345678" [(ngModel)]="usuario.cedula">
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Teléfono</label>
+                <input type="text" name="telefono" class="form-control" placeholder="Ej. 0987654321" [(ngModel)]="usuario.telefono">
+              </div>
+            </div>
+
+            <h5 class="border-bottom pb-2 mt-4 mb-3 text-secondary">Ubicación</h5>
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Provincia</label>
+                <select name="provincia" class="form-select" [(ngModel)]="usuario.provincia">
+                  <option value="" disabled selected>Selecciona una provincia</option>
+                  <option *ngFor="let p of provincias" [value]="p">{{ p }}</option>
+                </select>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Cantón</label>
+                <input type="text" name="canton" class="form-control" [(ngModel)]="usuario.canton">
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Ciudad</label>
+                <input type="text" name="ciudad" class="form-control" [(ngModel)]="usuario.ciudad">
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Comunidad / Sector</label>
+                <input type="text" name="comunidad" class="form-control" [(ngModel)]="usuario.comunidad">
+              </div>
+              <div class="col-md-12 mb-3">
+                <label class="form-label">Dirección Exacta</label>
+                <textarea name="direccion" class="form-control" rows="2" [(ngModel)]="usuario.direccion"></textarea>
+              </div>
+            </div>
+
+            <div class="text-end mt-4">
+              <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm">
+                <i class="bi bi-save"></i> Guardar Cambios
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

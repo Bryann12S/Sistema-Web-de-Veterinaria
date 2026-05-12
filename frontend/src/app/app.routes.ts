@@ -11,17 +11,21 @@ import { CitaForm } from './pages/cita/cita-form/cita-form';
 import { CitaList } from './pages/cita/cita-list/cita-list';
 import { HistorialForm } from './pages/historial/historial-form/historial-form';
 import { HistorialList } from './pages/historial/historial-list/historial-list';
+import { Registro } from './pages/registro/registro';
+import { Perfil } from './pages/perfil/perfil';
 
 
 export const routes: Routes = [
     { path: '', redirectTo: 'login', pathMatch: 'full' },
     { path: 'login', component: Login },
+    { path: 'registro', component: Registro },
     {
         path: 'app',
         component: MainLayout,
         canActivate: [authGuard],
         children: [
             { path: 'dashboard', component: Dashboard },
+            { path: 'perfil', component: Perfil },
 
             // Mascotas — todos los roles autenticados
             { path: 'mascotas-list', component: MascotaList },

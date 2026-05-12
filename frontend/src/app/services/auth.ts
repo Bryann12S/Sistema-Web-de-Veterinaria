@@ -21,6 +21,18 @@ export class Auth {
     );
   }
 
+  registro(datos: any) {
+    return this.http.post(`${this.API_URL}/registro`, datos);
+  }
+
+  getPerfil() {
+    return this.http.get(`${this.API_URL}/perfil`);
+  }
+
+  actualizarPerfil(datos: any) {
+    return this.http.put(`${this.API_URL}/perfil`, datos);
+  }
+
   logout() {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
