@@ -37,6 +37,11 @@ const Usuario = {
         const [rows] = await db.execute(query);
         return rows;
     },
+    getAllParaAdmin: async () => {
+        const query = 'SELECT id, nombre, apellidos, cedula, email, rol, telefono, provincia, canton, ciudad, comunidad, direccion, estado, created_at FROM usuarios ORDER BY created_at DESC';
+        const [rows] = await db.execute(query);
+        return rows;
+    },
     getVeterinarios: async () => {
         const query = 'SELECT id, nombre, apellidos, email, rol, telefono FROM usuarios WHERE rol = "veterinario" AND estado = "activo"';
         const [rows] = await db.execute(query);

@@ -145,7 +145,7 @@ const usuarioController = {
     //obtener todos los usuarios (solo admin)
     obtenerTodos: async (req, res) => {
         try {
-            const usuarios = await Usuario.getAll();
+            const usuarios = await Usuario.getAllParaAdmin();
             res.json(usuarios);
         } catch (error) {
             res.status(500).json({ error: "Error al obtener usuarios: " + error.message });
@@ -221,6 +221,38 @@ const usuarioController = {
             res.json({ message: "Estado del usuario actualizado exitosamente" });
         } catch (error) {
             res.status(500).json({ error: "Error al cambiar el estado: " + error.message });
+        }
+    },
+    //actualizar usuario (solo admin)
+    actualizarUsuario: async (req, res) => {
+        try {
+            const { id } = req.params;
+            const { nombre, apellidos, cedula, telefono, provincia, canton, ciudad, comunidad, direccion } = req.body;
+
+            const usuario = await Usuario.buscarPorId(id);
+            if (!usuario) {
+                return res.status(404).json({ error: "Usuario no encontrado" });
+            }
+
+            await Usuario.actualizar(id, {
+                nombre: nombre || usuario.nombre,
+                apellidos: apellidos || usuario.apellidos,
+                cedula: cedula || usuario.cedula,
+                telefono: telefono || usuario.telefono,
+                provincia: provincia || usuario.provincia,
+                canton: canton || usuario.canton,
+                ciudad: ciudad || usuario.ciudad,
+                comunidad: comunidad || usuario.comunidad,
+                direccion: direccion || usuario.direccion,
+                foto: usuario.foto
+            });
+
+            res.json({ message: "Usuario actualizado exitosamente" });
+        } catch (error) {
+            if (error.code === 'ER_DUP_ENTRY') {
+                return res.status(400).json({ error: "La cédula ya está en uso por otro usuario." });
+            }
+            res.status(500).json({ error: "Error al actualizar el usuario: " + error.message });
         }
     },
     //actualizar rol de usuario (solo admin)

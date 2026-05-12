@@ -17,6 +17,7 @@ router.post('/crear-personal', verificacionToken, authorize('admin'), usuarioCon
 router.get('/todos', verificacionToken, authorize('admin'), usuarioController.obtenerTodos);
 router.put('/:id/estado', verificacionToken, authorize('admin'), usuarioController.cambiarEstado);
 router.put('/:id/rol', verificacionToken, authorize('admin'), usuarioController.actualizarRol);
+router.put('/:id', verificacionToken, authorize('admin'), usuarioController.actualizarUsuario);
 
 // Obtener veterinarios (público, cualquier rol autenticado)
 router.get('/veterinarios', verificacionToken, usuarioController.obtenerVeterinarios);
