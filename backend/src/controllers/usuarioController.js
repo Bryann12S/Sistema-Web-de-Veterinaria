@@ -174,10 +174,16 @@ const usuarioController = {
                 return res.status(404).json({ error: "Usuario no encontrado" });
             }
 
+            // Solo permitir actualizar la cédula si aún no tiene una
+            let cedulaAActualizar = usuario.cedula;
+            if (!usuario.cedula && req.body.cedula) {
+                cedulaAActualizar = req.body.cedula;
+            }
+
             await Usuario.actualizar(req.user.id, {
                 nombre: nombre || usuario.nombre,
                 apellidos: apellidos || usuario.apellidos,
-                cedula: cedula || usuario.cedula,
+                cedula: cedulaAActualizar,
                 telefono: telefono || usuario.telefono,
                 provincia: provincia || usuario.provincia,
                 canton: canton || usuario.canton,
@@ -189,6 +195,9 @@ const usuarioController = {
 
             res.json({ message: "Perfil actualizado exitosamente" });
         } catch (error) {
+            if (error.code === 'ER_DUP_ENTRY') {
+                return res.status(400).json({ error: "La cédula o el email ya están en uso por otro usuario." });
+            }
             res.status(500).json({ error: "Error al actualizar el perfil: " + error.message });
         }
     },
