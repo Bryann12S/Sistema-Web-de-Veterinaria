@@ -33,15 +33,15 @@ const Mascota = {
         return result.insertId;
     },
     actualizar: async (id, data) => {
-        const { nombre, especie, raza, sexo, color, peso, fecha_nacimiento, esterilizado, foto, user_id } = data;
+        const { nombre, especie, raza, sexo, color, peso, fecha_nacimiento, esterilizado, foto, user_id, estado } = data;
         await db.query(`
             UPDATE mascotas 
-            SET nombre = ?, especie = ?, raza = ?, sexo = ?, color = ?, peso = ?, fecha_nacimiento = ?, esterilizado = ?, foto = ?, user_id = ? 
+            SET nombre = ?, especie = ?, raza = ?, sexo = ?, color = ?, peso = ?, fecha_nacimiento = ?, esterilizado = ?, foto = ?, user_id = ?, estado = ? 
             WHERE id = ?
-        `, [nombre, especie, raza, sexo, color, peso, fecha_nacimiento, esterilizado, foto, user_id, id]);
+        `, [nombre, especie, raza, sexo, color, peso, fecha_nacimiento, esterilizado, foto, user_id, estado, id]);
     },
     eliminar: async (id) => {
-        await db.query('DELETE FROM mascotas WHERE id = ?', [id]);
+        await db.query('UPDATE mascotas SET estado = "inactiva" WHERE id = ?', [id]);
     }
 };
 module.exports = Mascota;

@@ -21,12 +21,12 @@ const Usuario = {
         return rows[0];
     },
     getAll: async () => {
-        const query = 'SELECT id, nombre, apellidos, cedula, email, rol, telefono, provincia, canton, ciudad, comunidad, direccion, estado, created_at FROM usuarios WHERE estado = 1';
+        const query = 'SELECT id, nombre, apellidos, cedula, email, rol, telefono, provincia, canton, ciudad, comunidad, direccion, estado, created_at FROM usuarios WHERE estado = "activo"';
         const [rows] = await db.execute(query);
         return rows;
     },
     getVeterinarios: async () => {
-        const query = 'SELECT id, nombre, apellidos, email, rol, telefono FROM usuarios WHERE rol = "veterinario" AND estado = 1';
+        const query = 'SELECT id, nombre, apellidos, email, rol, telefono FROM usuarios WHERE rol = "veterinario" AND estado = "activo"';
         const [rows] = await db.execute(query);
         return rows;
     },
@@ -47,7 +47,7 @@ const Usuario = {
         await db.execute(query, [estado, id]);
     },
     eliminar: async (id) => {
-        const query = 'UPDATE usuarios SET estado = 0 WHERE id = ?';
+        const query = 'UPDATE usuarios SET estado = "inactivo" WHERE id = ?';
         await db.execute(query, [id]);
     }
 };

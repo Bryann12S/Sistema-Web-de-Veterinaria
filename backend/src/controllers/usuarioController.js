@@ -92,8 +92,8 @@ const usuarioController = {
                 return res.status(404).json({ error: "Usuario no encontrado" });
             }
 
-            if (usuario.estado === 0) {
-                return res.status(403).json({ error: "Usuario inactivo" });
+            if (usuario.estado === 'inactivo' || usuario.estado === 'suspendido') {
+                return res.status(403).json({ error: "Usuario inactivo o suspendido" });
             }
 
             const passwordMatch = await bcrypt.compare(password, usuario.password);
@@ -197,8 +197,9 @@ const usuarioController = {
             const { id } = req.params;
             const { estado } = req.body;
 
-            if (estado !== 0 && estado !== 1) {
-                return res.status(400).json({ error: "El estado debe ser 0 (inactivo) o 1 (activo)" });
+            const estadosPermitidos = ['activo', 'inactivo', 'suspendido'];
+            if (!estadosPermitidos.includes(estado)) {
+                return res.status(400).json({ error: "El estado debe ser activo, inactivo o suspendido" });
             }
 
             const usuario = await Usuario.buscarPorId(id);

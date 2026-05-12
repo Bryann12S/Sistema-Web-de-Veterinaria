@@ -66,7 +66,7 @@ const mascotaController = {
         try {
             const { id } = req.params;
             const {id: userId, rol} = req.user;
-            const { nombre, especie, raza, sexo, color, peso, fecha_nacimiento, esterilizado, foto } = req.body;
+            const { nombre, especie, raza, sexo, color, peso, fecha_nacimiento, esterilizado, foto, estado } = req.body;
 
             const mascota = await Mascota.getById(id);
             if (!mascota) {
@@ -86,7 +86,8 @@ const mascotaController = {
                 fecha_nacimiento: fecha_nacimiento || mascota.fecha_nacimiento,
                 esterilizado: esterilizado !== undefined ? esterilizado : mascota.esterilizado,
                 foto: foto || mascota.foto,
-                user_id: mascota.user_id
+                user_id: mascota.user_id,
+                estado: estado || mascota.estado
             };
 
             await Mascota.actualizar(id, datosMascota);
