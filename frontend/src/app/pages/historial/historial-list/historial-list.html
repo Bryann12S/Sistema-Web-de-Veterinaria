@@ -21,23 +21,35 @@
       <thead class="table-light">
         <tr>
           <th>Fecha</th>
-          <th>Motivo</th>
-          <th>Descripción</th>
-          <th>Tratamiento</th>
-          <th>Observaciones</th>
           <th>Cita Asociada</th>
+          <th>Diagnóstico</th>
+          <th>Tratamiento</th>
+          <th>Peso / Temp</th>
+          <th>Notas</th>
+          <th>Próxima Visita</th>
         </tr>
       </thead>
       <tbody>
         <tr *ngFor="let entry of historial">
-          <td>{{ entry.fecha | date:'dd/MM/yyyy' }}</td>
-          <td>{{ entry.motivo }}</td>
-          <td>{{ entry.descripcion }}</td>
-          <td>{{ entry.tratamiento }}</td>
-          <td>{{ entry.observaciones }}</td>
           <td>
-            <span *ngIf="entry.cita_fecha">{{ entry.cita_fecha | date:'dd/MM/yyyy' }} {{ entry.cita_hora }}</span>
-            <span *ngIf="!entry.cita_fecha">-</span>
+            <div class="fw-bold">{{ entry.fecha | date:'dd/MM/yyyy' }}</div>
+            <small class="text-muted" *ngIf="entry.veterinario_nombre"><i class="bi bi-person"></i> {{ entry.veterinario_nombre }}</small>
+          </td>
+          <td>
+            <span *ngIf="entry.cita_fecha"><i class="bi bi-calendar"></i> {{ entry.cita_fecha | date:'dd/MM/yyyy' }}</span>
+            <span *ngIf="!entry.cita_fecha" class="text-muted small">-</span>
+          </td>
+          <td>{{ entry.diagnostico }}</td>
+          <td>{{ entry.tratamiento || '-' }}</td>
+          <td>
+            <div *ngIf="entry.peso"><small>Peso:</small> {{ entry.peso }} kg</div>
+            <div *ngIf="entry.temperatura"><small>Temp:</small> {{ entry.temperatura }} °C</div>
+            <div *ngIf="!entry.peso && !entry.temperatura" class="text-muted small">-</div>
+          </td>
+          <td>{{ entry.notas || '-' }}</td>
+          <td>
+            <span *ngIf="entry.proxima_visita" class="badge bg-info text-dark"><i class="bi bi-calendar-check"></i> {{ entry.proxima_visita | date:'dd/MM/yyyy' }}</span>
+            <span *ngIf="!entry.proxima_visita" class="text-muted small">-</span>
           </td>
         </tr>
       </tbody>

@@ -29,10 +29,12 @@ export class HistorialForm implements OnInit {
     this.historialForm = this.fb.group({
       mascota_id: ['', Validators.required],
       cita_id: [''],
-      motivo: ['', Validators.required],
-      descripcion: ['', Validators.required],
+      peso: [''],
+      temperatura: [''],
+      diagnostico: ['', Validators.required],
       tratamiento: [''],
-      observaciones: ['']
+      notas: [''],
+      proxima_visita: ['']
     });
   }
 

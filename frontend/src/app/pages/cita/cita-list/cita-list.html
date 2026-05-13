@@ -82,6 +82,14 @@
                   <button class="btn btn-sm btn-light rounded-circle shadow-sm text-primary me-1" *ngIf="rol === 'admin' && (cita.estado === 'pendiente' || cita.estado === 'confirmada')" title="Asignar Veterinario" (click)="abrirModalAsignarVet(cita)">
                     <i class="bi bi-person-plus-fill fs-5"></i>
                   </button>
+                  <!-- Crear Historial Médico -->
+                  <button class="btn btn-sm btn-light rounded-circle shadow-sm text-primary me-1" *ngIf="cita.estado === 'completada' && !cita.historial_id" title="Completar Historial Médico" (click)="abrirModalHistorial(cita)">
+                    <i class="bi bi-file-earmark-medical-fill fs-5"></i>
+                  </button>
+                  <!-- Historial Completado -->
+                  <span class="btn btn-sm btn-light rounded-circle shadow-sm text-success me-1" style="cursor: default;" *ngIf="cita.estado === 'completada' && cita.historial_id" title="Historial Médico Completado">
+                    <i class="bi bi-file-earmark-check-fill fs-5"></i>
+                  </span>
                   <!-- Eliminar (Solo Admin) -->
                   <button class="btn btn-sm btn-light rounded-circle shadow-sm text-danger" *ngIf="rol === 'admin'" title="Eliminar Cita Permanentemente" (click)="eliminarCita(cita.id)">
                     <i class="bi bi-trash-fill fs-5"></i>
@@ -239,6 +247,58 @@
           <div class="text-end">
             <button type="button" class="btn btn-light btn-sm me-2 fw-bold" data-bs-dismiss="modal">Cancelar</button>
             <button type="submit" class="btn btn-primary btn-sm fw-bold shadow-sm px-3" [disabled]="!formVet.valid">Asignar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Historial Medico (Vet/Admin) -->
+<div class="modal fade" id="modalHistorial" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content border-0 rounded-4 shadow-lg">
+      <div class="modal-header bg-success text-white border-0 rounded-top-4">
+        <h5 class="modal-title fw-bold"><i class="bi bi-file-earmark-medical"></i> Completar Historial Médico</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-4">
+        <div class="alert alert-info py-2" *ngIf="citaParaHistorial">
+          <strong>Paciente:</strong> {{ citaParaHistorial.nombre_mascota }} | 
+          <strong>Motivo:</strong> {{ citaParaHistorial.motivo || 'No especificado' }}
+        </div>
+        <form (ngSubmit)="guardarHistorial()" #formHistorial="ngForm">
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label fw-semibold">Peso (kg)</label>
+              <input type="number" step="0.01" class="form-control" name="peso" [(ngModel)]="historialActual.peso" placeholder="Ej. 12.5">
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label fw-semibold">Temperatura (°C)</label>
+              <input type="number" step="0.1" class="form-control" name="temperatura" [(ngModel)]="historialActual.temperatura" placeholder="Ej. 38.5">
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Diagnóstico <span class="text-danger">*</span></label>
+            <textarea class="form-control" name="diagnostico" rows="2" [(ngModel)]="historialActual.diagnostico" required placeholder="Describe el diagnóstico..."></textarea>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Tratamiento</label>
+            <textarea class="form-control" name="tratamiento" rows="2" [(ngModel)]="historialActual.tratamiento" placeholder="Medicamentos, dosis, indicaciones..."></textarea>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Notas Adicionales</label>
+            <textarea class="form-control" name="notas" rows="2" [(ngModel)]="historialActual.notas" placeholder="Observaciones generales..."></textarea>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Próxima Visita (Opcional)</label>
+            <input type="date" class="form-control" name="proxima_visita" [(ngModel)]="historialActual.proxima_visita">
+          </div>
+          <div class="text-end mt-4">
+            <button type="button" class="btn btn-light me-2 fw-bold px-4" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn-success fw-bold px-4 shadow-sm" [disabled]="!formHistorial.valid">
+              <i class="bi bi-save"></i> Guardar Historial
+            </button>
           </div>
         </form>
       </div>

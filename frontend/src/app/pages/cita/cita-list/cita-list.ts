@@ -6,6 +6,7 @@ import { Cita } from '../../../services/cita';
 import { Auth } from '../../../services/auth';
 import { Mascota } from '../../../services/mascota';
 import { UsuarioService } from '../../../services/usuario.service';
+import { Historial } from '../../../services/historial';
 
 declare var bootstrap: any;
 
@@ -40,11 +41,18 @@ export class CitaList implements OnInit {
   citaSeleccionadaParaVet: any = null;
   nuevoVetId: string = '';
 
+  // Historial Medico
+  historialActual: any = {
+    cita_id: '', mascota_id: '', diagnostico: '', peso: '', temperatura: '', tratamiento: '', notas: '', proxima_visita: ''
+  };
+  citaParaHistorial: any = null;
+
   constructor(
     private citaService: Cita,
     private authService: Auth,
     private mascotaService: Mascota,
     private usuarioService: UsuarioService,
+    private historialService: Historial,
     private cdr: ChangeDetectorRef
   ) { }
 
@@ -178,6 +186,13 @@ export class CitaList implements OnInit {
         next: () => {
           this.mostrarAviso(`Cita marcada como ${nuevoEstado}.`);
           this.cargarDatos();
+          
+          if (nuevoEstado === 'completada' && (this.rol === 'veterinario' || this.rol === 'admin')) {
+             const citaCompletada = this.citas.find(c => c.id === id);
+             if (citaCompletada && confirm('¿Deseas completar el historial médico ahora?')) {
+                 this.abrirModalHistorial(citaCompletada);
+             }
+          }
         },
         error: (err) => alert(err.error?.error || 'Error al actualizar estado')
       });
@@ -199,6 +214,33 @@ export class CitaList implements OnInit {
         this.cargarDatos();
       },
       error: (err) => alert(err.error?.error || 'Error al asignar veterinario')
+    });
+  }
+
+  abrirModalHistorial(cita: any) {
+    this.citaParaHistorial = cita;
+    this.historialActual = {
+      cita_id: cita.id,
+      mascota_id: cita.mascota_id,
+      diagnostico: '',
+      peso: '',
+      temperatura: '',
+      tratamiento: '',
+      notas: '',
+      proxima_visita: ''
+    };
+    const modal = new bootstrap.Modal(document.getElementById('modalHistorial'));
+    modal.show();
+  }
+
+  guardarHistorial() {
+    this.historialService.crearHistorial(this.historialActual).subscribe({
+      next: () => {
+        this.cerrarModal('modalHistorial');
+        this.mostrarAviso('Historial médico creado exitosamente.');
+        this.cargarDatos();
+      },
+      error: (err) => alert(err.error?.error || 'Error al crear historial médico')
     });
   }
 

@@ -20,19 +20,22 @@
         </select>
       </div>
 
-      <div class="mb-3">
-        <label class="form-label">Motivo</label>
-        <input type="text" formControlName="motivo" class="form-control" placeholder="Motivo de la consulta">
-        <div *ngIf="historialForm.get('motivo')?.invalid && historialForm.get('motivo')?.touched" class="text-danger small mt-1">
-          El motivo es requerido.
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Peso (kg)</label>
+          <input type="number" step="0.01" formControlName="peso" class="form-control" placeholder="Ej. 12.5">
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Temperatura (°C)</label>
+          <input type="number" step="0.1" formControlName="temperatura" class="form-control" placeholder="Ej. 38.5">
         </div>
       </div>
 
       <div class="mb-3">
-        <label class="form-label">Descripción</label>
-        <textarea formControlName="descripcion" class="form-control" rows="3" placeholder="Describe el diagnóstico o hallazgos..."></textarea>
-        <div *ngIf="historialForm.get('descripcion')?.invalid && historialForm.get('descripcion')?.touched" class="text-danger small mt-1">
-          La descripción es requerida.
+        <label class="form-label">Diagnóstico</label>
+        <textarea formControlName="diagnostico" class="form-control" rows="3" placeholder="Describe el diagnóstico o hallazgos..."></textarea>
+        <div *ngIf="historialForm.get('diagnostico')?.invalid && historialForm.get('diagnostico')?.touched" class="text-danger small mt-1">
+          El diagnóstico es requerido.
         </div>
       </div>
 
@@ -42,8 +45,13 @@
       </div>
 
       <div class="mb-3">
-        <label class="form-label">Observaciones</label>
-        <textarea formControlName="observaciones" class="form-control" rows="3" placeholder="Observaciones adicionales..."></textarea>
+        <label class="form-label">Notas Adicionales</label>
+        <textarea formControlName="notas" class="form-control" rows="3" placeholder="Observaciones adicionales..."></textarea>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Próxima Visita</label>
+        <input type="date" formControlName="proxima_visita" class="form-control">
       </div>
 
       <button type="submit" class="btn btn-primary" [disabled]="historialForm.invalid">Crear Historial</button>
