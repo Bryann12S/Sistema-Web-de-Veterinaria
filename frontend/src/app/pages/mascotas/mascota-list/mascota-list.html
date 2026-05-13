@@ -53,6 +53,9 @@
                 <button class="btn btn-sm btn-light rounded-circle shadow-sm me-2 text-primary" title="Historial Médico" [routerLink]="['/app/historial-list', mascota.id]">
                   <i class="bi bi-file-medical-fill fs-5"></i>
                 </button>
+                <button class="btn btn-sm btn-light rounded-circle shadow-sm me-2 text-info" title="Carnet de Vacunas" [routerLink]="['/app/carnet-vacunas', mascota.id]">
+                  <i class="bi bi-shield-check fs-5"></i>
+                </button>
                 <button class="btn btn-sm btn-light rounded-circle shadow-sm me-2 text-warning" *ngIf="puedeEditar()" title="Editar Mascota" (click)="abrirModalEditar(mascota)">
                   <i class="bi bi-pencil-fill fs-5"></i>
                 </button>

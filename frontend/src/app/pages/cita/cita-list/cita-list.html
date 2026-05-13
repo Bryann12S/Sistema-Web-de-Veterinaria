@@ -90,6 +90,10 @@
                   <span class="btn btn-sm btn-light rounded-circle shadow-sm text-success me-1" style="cursor: default;" *ngIf="cita.estado === 'completada' && cita.historial_id" title="Historial Médico Completado">
                     <i class="bi bi-file-earmark-check-fill fs-5"></i>
                   </span>
+                  <!-- Aplicar Vacuna Manualmente -->
+                  <button class="btn btn-sm btn-light rounded-circle shadow-sm text-secondary me-1" *ngIf="cita.estado === 'completada'" title="Aplicar Vacuna" (click)="abrirModalVacuna(cita)">
+                    <i class="bi bi-syringe-fill fs-5"></i>
+                  </button>
                   <!-- Eliminar (Solo Admin) -->
                   <button class="btn btn-sm btn-light rounded-circle shadow-sm text-danger" *ngIf="rol === 'admin'" title="Eliminar Cita Permanentemente" (click)="eliminarCita(cita.id)">
                     <i class="bi bi-trash-fill fs-5"></i>
@@ -298,6 +302,44 @@
             <button type="button" class="btn btn-light me-2 fw-bold px-4" data-bs-dismiss="modal">Cancelar</button>
             <button type="submit" class="btn btn-success fw-bold px-4 shadow-sm" [disabled]="!formHistorial.valid">
               <i class="bi bi-save"></i> Guardar Historial
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Aplicar Vacuna -->
+<div class="modal fade" id="modalVacuna" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 rounded-4 shadow-lg">
+      <div class="modal-header bg-info text-white border-0 rounded-top-4">
+        <h5 class="modal-title fw-bold"><i class="bi bi-syringe"></i> Aplicar Vacuna</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-4">
+        <form (ngSubmit)="guardarVacuna()" #formVacuna="ngForm">
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Nombre de la Vacuna <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" name="nombre" [(ngModel)]="vacunaActual.nombre" required placeholder="Ej. Rabia, Parvovirus, Sextuple">
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Fecha de Aplicación <span class="text-danger">*</span></label>
+            <input type="date" class="form-control" name="fecha_aplicacion" [(ngModel)]="vacunaActual.fecha_aplicacion" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Próxima Dosis (Opcional)</label>
+            <input type="date" class="form-control" name="proxima_dosis" [(ngModel)]="vacunaActual.proxima_dosis">
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Observaciones</label>
+            <textarea class="form-control" name="observaciones" rows="2" [(ngModel)]="vacunaActual.observaciones" placeholder="Lote, marca o indicaciones..."></textarea>
+          </div>
+          <div class="text-end mt-4">
+            <button type="button" class="btn btn-light me-2 fw-bold px-4" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn-info text-white fw-bold px-4 shadow-sm" [disabled]="!formVacuna.valid">
+              <i class="bi bi-save"></i> Registrar Vacuna
             </button>
           </div>
         </form>

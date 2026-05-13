@@ -7,6 +7,7 @@ import { Auth } from '../../../services/auth';
 import { Mascota } from '../../../services/mascota';
 import { UsuarioService } from '../../../services/usuario.service';
 import { Historial } from '../../../services/historial';
+import { Vacuna } from '../../../services/vacuna';
 
 declare var bootstrap: any;
 
@@ -47,12 +48,18 @@ export class CitaList implements OnInit {
   };
   citaParaHistorial: any = null;
 
+  // Vacunas
+  vacunaActual: any = {
+    mascota_id: '', nombre: '', fecha_aplicacion: '', proxima_dosis: '', observaciones: ''
+  };
+
   constructor(
     private citaService: Cita,
     private authService: Auth,
     private mascotaService: Mascota,
     private usuarioService: UsuarioService,
     private historialService: Historial,
+    private vacunaService: Vacuna,
     private cdr: ChangeDetectorRef
   ) { }
 
@@ -239,8 +246,38 @@ export class CitaList implements OnInit {
         this.cerrarModal('modalHistorial');
         this.mostrarAviso('Historial médico creado exitosamente.');
         this.cargarDatos();
+
+        // Mostrar módulo vacunas automáticamente según tipo_consulta
+        if (this.citaParaHistorial && 
+           ['Vacunación', 'Control', 'General'].includes(this.citaParaHistorial.tipo_consulta)) {
+           if (confirm('El tipo de consulta sugiere vacunación. ¿Deseas aplicar una vacuna ahora?')) {
+             this.abrirModalVacuna(this.citaParaHistorial);
+           }
+        }
       },
       error: (err) => alert(err.error?.error || 'Error al crear historial médico')
+    });
+  }
+
+  abrirModalVacuna(cita: any) {
+    this.vacunaActual = {
+      mascota_id: cita.mascota_id,
+      nombre: '',
+      fecha_aplicacion: this.formatearFechaLocal(new Date()),
+      proxima_dosis: '',
+      observaciones: ''
+    };
+    const modal = new bootstrap.Modal(document.getElementById('modalVacuna'));
+    modal.show();
+  }
+
+  guardarVacuna() {
+    this.vacunaService.crearVacuna(this.vacunaActual).subscribe({
+      next: () => {
+        this.cerrarModal('modalVacuna');
+        this.mostrarAviso('Vacuna aplicada y registrada exitosamente.');
+      },
+      error: (err) => alert(err.error?.error || 'Error al registrar vacuna')
     });
   }
 

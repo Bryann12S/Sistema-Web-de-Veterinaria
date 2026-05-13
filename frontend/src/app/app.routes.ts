@@ -13,6 +13,7 @@ import { HistorialList } from './pages/historial/historial-list/historial-list';
 import { Registro } from './pages/registro/registro';
 import { Perfil } from './pages/perfil/perfil';
 import { UsuariosList } from './pages/usuarios/usuarios-list/usuarios-list';
+import { VacunasList } from './pages/vacunas/vacunas-list/vacunas-list';
 
 
 export const routes: Routes = [
@@ -52,6 +53,23 @@ export const routes: Routes = [
                 path: 'historial-form',
                 component: HistorialForm,
                 canActivate: [roleGuard('veterinario', 'admin')]
+            },
+
+            // Vacunas
+            {
+                path: 'vacunas-list',
+                component: VacunasList,
+                canActivate: [roleGuard('veterinario', 'admin')]
+            },
+            {
+                path: 'vacunas-proximas',
+                component: VacunasList,
+                canActivate: [roleGuard('veterinario', 'admin')]
+            },
+            {
+                path: 'carnet-vacunas/:id',
+                component: VacunasList,
+                canActivate: [roleGuard('cliente', 'veterinario', 'admin')]
             },
         ]
     },
