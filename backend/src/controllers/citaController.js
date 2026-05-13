@@ -130,7 +130,7 @@ const citaController = {
             const { id } = req.params;
             const { estado } = req.body;
 
-            const opcionesValidadas = ['pendiente','confirmada','completada', 'cancelada'];
+            const opcionesValidadas = ['pendiente','confirmada','en_consulta','completada', 'cancelada'];
             if (!estado || !opcionesValidadas.includes(estado.toLowerCase().trim())) {
                 return res.status(400).json({
                     error: "Estado no válido",
