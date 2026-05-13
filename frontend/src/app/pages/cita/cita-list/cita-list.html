@@ -1,149 +1,210 @@
-<!-- Estado de carga -->
-<div *ngIf="cargando" class="text-center py-4">
-  <div class="spinner-border text-primary" role="status">
-    <span class="visually-hidden">Cargando...</span>
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold text-primary">
+      <i class="bi bi-calendar-event"></i> 
+      {{ rol === 'cliente' ? 'Mis Citas' : 'Gestión de Citas' }}
+    </h2>
+    <button class="btn btn-primary rounded-pill shadow-sm fw-bold px-4" *ngIf="rol === 'cliente'" (click)="abrirModalAgendar()">
+      <i class="bi bi-calendar-plus me-1"></i> Agendar Cita
+    </button>
+  </div>
+
+  <!-- PANTALLA DE CARGA -->
+  <div *ngIf="isLoading" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+      <span class="visually-hidden">Cargando...</span>
+    </div>
+    <h5 class="mt-3 text-muted fw-bold">Cargando citas...</h5>
+  </div>
+
+  <div class="card shadow border-0 rounded-4" *ngIf="!isLoading">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th class="ps-4">Fecha y Hora</th>
+              <th>Mascota</th>
+              <th>Servicio</th>
+              <th>Veterinario</th>
+              <th>Estado</th>
+              <th class="text-center pe-4">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let cita of citas">
+              <td class="ps-4">
+                <div class="fw-bold text-dark">{{ cita.fecha | date:'dd/MM/yyyy' }}</div>
+                <small class="text-muted"><i class="bi bi-clock"></i> {{ cita.hora | slice:0:5 }}</small>
+              </td>
+              <td>
+                <div class="fw-bold">{{ cita.nombre_mascota }}</div>
+                <small class="text-muted" *ngIf="rol !== 'cliente'"><i class="bi bi-person"></i> {{ cita.duenio_nombre }}</small>
+              </td>
+              <td>
+                <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary rounded-pill px-3">{{ cita.tipo_consulta }}</span>
+                <div class="text-muted small mt-1 text-truncate" style="max-width: 150px;" title="{{cita.motivo}}">{{ cita.motivo || 'Sin motivo especificado' }}</div>
+              </td>
+              <td>
+                <span *ngIf="cita.veterinario_nombre" class="text-dark"><i class="bi bi-person-badge"></i> {{ cita.veterinario_nombre }}</span>
+                <span *ngIf="!cita.veterinario_nombre" class="text-muted small"><i>Sin asignar</i></span>
+              </td>
+              <td>
+                <span class="badge rounded-pill" [ngClass]="badgeEstado(cita.estado)">
+                  {{ cita.estado | titlecase }}
+                </span>
+              </td>
+              <td class="text-center pe-4">
+                
+                <!-- Acciones Cliente -->
+                <ng-container *ngIf="rol === 'cliente'">
+                  <button class="btn btn-sm btn-light rounded-circle shadow-sm text-danger" *ngIf="cita.estado === 'pendiente' || cita.estado === 'confirmada'" title="Cancelar Cita" (click)="actualizarEstado(cita.id, 'cancelada')">
+                    <i class="bi bi-x-circle-fill fs-5"></i>
+                  </button>
+                  <span *ngIf="cita.estado === 'completada' || cita.estado === 'cancelada'" class="text-muted small"><i class="bi bi-dash"></i></span>
+                </ng-container>
+
+                <!-- Acciones Vet/Admin -->
+                <ng-container *ngIf="rol === 'admin' || rol === 'veterinario'">
+                  <!-- Cambiar a Confirmada -->
+                  <button class="btn btn-sm btn-light rounded-circle shadow-sm text-info me-1" *ngIf="cita.estado === 'pendiente'" title="Confirmar Cita" (click)="actualizarEstado(cita.id, 'confirmada')">
+                    <i class="bi bi-check-circle-fill fs-5"></i>
+                  </button>
+                  <!-- Cambiar a Completada -->
+                  <button class="btn btn-sm btn-light rounded-circle shadow-sm text-success me-1" *ngIf="cita.estado === 'confirmada'" title="Finalizar Consulta" (click)="actualizarEstado(cita.id, 'completada')">
+                    <i class="bi bi-clipboard-check-fill fs-5"></i>
+                  </button>
+                  <!-- Cancelar -->
+                  <button class="btn btn-sm btn-light rounded-circle shadow-sm text-warning me-1" *ngIf="cita.estado === 'pendiente' || cita.estado === 'confirmada'" title="Cancelar Cita" (click)="actualizarEstado(cita.id, 'cancelada')">
+                    <i class="bi bi-x-circle-fill fs-5"></i>
+                  </button>
+                  <!-- Asignar Veterinario (Solo Admin) -->
+                  <button class="btn btn-sm btn-light rounded-circle shadow-sm text-primary me-1" *ngIf="rol === 'admin' && (cita.estado === 'pendiente' || cita.estado === 'confirmada')" title="Asignar Veterinario" (click)="abrirModalAsignarVet(cita)">
+                    <i class="bi bi-person-plus-fill fs-5"></i>
+                  </button>
+                  <!-- Eliminar (Solo Admin) -->
+                  <button class="btn btn-sm btn-light rounded-circle shadow-sm text-danger" *ngIf="rol === 'admin'" title="Eliminar Cita Permanentemente" (click)="eliminarCita(cita.id)">
+                    <i class="bi bi-trash-fill fs-5"></i>
+                  </button>
+
+                  <span *ngIf="(cita.estado === 'completada' || cita.estado === 'cancelada') && rol !== 'admin'" class="text-muted small"><i class="bi bi-dash"></i></span>
+                </ng-container>
+
+              </td>
+            </tr>
+            <tr *ngIf="citas.length === 0">
+              <td colspan="6" class="text-center py-5 text-muted">
+                <i class="bi bi-calendar-x fs-1 d-block mb-2"></i>
+                No se encontraron citas registradas.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- AVISO TOAST -->
+  <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1055">
+    <div class="toast align-items-center text-white bg-success border-0 shadow-lg" 
+         [class.show]="showToast" role="alert" aria-live="assertive" aria-atomic="true" 
+         style="transition: opacity 0.3s ease-in-out; opacity: {{showToast ? 1 : 0}}; pointer-events: {{showToast ? 'auto' : 'none'}};">
+      <div class="d-flex">
+        <div class="toast-body fw-bold">
+          <i class="bi bi-check-circle-fill me-2 fs-5 vertical-align-middle"></i> {{ toastMessage }}
+        </div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" (click)="showToast = false" aria-label="Close"></button>
+      </div>
+    </div>
   </div>
 </div>
 
-<!-- Mensaje de error -->
-<div *ngIf="errorMsg" class="alert alert-danger">{{ errorMsg }}</div>
-
-<!-- ─────────────────────────────────────────────────────── -->
-<!-- VISTA CLIENTE: solo ve sus citas, sin acciones         -->
-<!-- ─────────────────────────────────────────────────────── -->
-<ng-container *ngIf="!cargando && esCliente()">
-  <h5 class="mb-3">📋 Mis Citas</h5>
-
-  <div *ngIf="citas.length === 0" class="alert alert-info">
-    No tienes citas registradas aún.
-    <a routerLink="/app/cita-form" class="alert-link ms-1">¡Agenda una ahora!</a>
-  </div>
-
-  <div class="table-responsive" *ngIf="citas.length > 0">
-    <table class="table table-hover align-middle">
-      <thead class="table-light">
-        <tr>
-          <th>Mascota</th>
-          <th>Fecha</th>
-          <th>Hora</th>
-          <th>Tipo</th>
-          <th>Motivo</th>
-          <th>Estado</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let cita of citas">
-          <td><strong>{{ cita.nombre_mascota }}</strong></td>
-          <td>{{ cita.fecha | date:'dd/MM/yyyy' }}</td>
-          <td>{{ cita.hora }}</td>
-          <td><span class="badge bg-secondary">{{ cita.tipo_consulta }}</span></td>
-          <td>{{ cita.motivo }}</td>
-          <td>
-            <span class="badge" [ngClass]="badgeEstado(cita.estado)">
-              {{ cita.estado | titlecase }}
-            </span>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-</ng-container>
-
-<!-- ─────────────────────────────────────────────────────────── -->
-<!-- VISTA ADMIN: ve todas las citas, sin botones de acción     -->
-<!-- ─────────────────────────────────────────────────────────── -->
-<ng-container *ngIf="!cargando && esAdmin()">
-  <h5 class="mb-3">📋 Todas las Citas</h5>
-
-  <div *ngIf="citas.length === 0" class="alert alert-info">No hay citas registradas.</div>
-
-  <div class="table-responsive" *ngIf="citas.length > 0">
-    <table class="table table-hover align-middle">
-      <thead class="table-light">
-        <tr>
-          <th>Mascota</th>
-          <th>Fecha</th>
-          <th>Hora</th>
-          <th>Tipo</th>
-          <th>Motivo</th>
-          <th>Estado</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let cita of citas">
-          <td><strong>{{ cita.nombre_mascota }}</strong></td>
-          <td>{{ cita.fecha | date:'dd/MM/yyyy' }}</td>
-          <td>{{ cita.hora }}</td>
-          <td><span class="badge bg-secondary">{{ cita.tipo_consulta }}</span></td>
-          <td>{{ cita.motivo }}</td>
-          <td>
-            <span class="badge" [ngClass]="badgeEstado(cita.estado)">
-              {{ cita.estado | titlecase }}
-            </span>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-</ng-container>
-
-<!-- ─────────────────────────────────────────────────────────────── -->
-<!-- VISTA VETERINARIO: ve todas las citas + puede cambiar estado   -->
-<!-- ─────────────────────────────────────────────────────────────── -->
-<ng-container *ngIf="!cargando && esVeterinario()">
-  <h5 class="mb-3">🩺 Gestión de Citas</h5>
-
-  <div *ngIf="citas.length === 0" class="alert alert-info">No hay citas registradas.</div>
-
-  <div class="table-responsive" *ngIf="citas.length > 0">
-    <table class="table table-hover align-middle">
-      <thead class="table-light">
-        <tr>
-          <th>Mascota</th>
-          <th>Fecha</th>
-          <th>Hora</th>
-          <th>Tipo</th>
-          <th>Motivo</th>
-          <th>Estado</th>
-          <th>Acciones</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let cita of citas">
-          <td><strong>{{ cita.nombre_mascota }}</strong></td>
-          <td>{{ cita.fecha | date:'dd/MM/yyyy' }}</td>
-          <td>{{ cita.hora }}</td>
-          <td><span class="badge bg-secondary">{{ cita.tipo_consulta }}</span></td>
-          <td>{{ cita.motivo }}</td>
-          <td>
-            <span class="badge" [ngClass]="badgeEstado(cita.estado)">
-              {{ cita.estado | titlecase }}
-            </span>
-          </td>
-          <td>
-            <!-- Confirmar: solo si está pendiente -->
-            <button *ngIf="cita.estado === 'pendiente'" (click)="actualizarEstado(cita.id, 'confirmada')"
-              class="btn btn-sm btn-success me-1">
-              <i class="bi bi-check-circle me-1"></i>Confirmar
+<!-- Modal Agendar Cita (Cliente) -->
+<div class="modal fade" id="modalCita" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 rounded-4 shadow-lg">
+      <div class="modal-header bg-primary text-white border-0 rounded-top-4">
+        <h5 class="modal-title fw-bold"><i class="bi bi-calendar-plus"></i> Agendar Nueva Cita</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-4">
+        <form (ngSubmit)="guardarCita()" #formCita="ngForm">
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Mascota Paciente <span class="text-danger">*</span></label>
+            <select class="form-select" name="mascota_id" [(ngModel)]="citaActual.mascota_id" required>
+              <option value="" disabled selected>Selecciona tu mascota...</option>
+              <option *ngFor="let m of mascotas" [value]="m.id">{{ m.nombre }} ({{ m.especie }})</option>
+            </select>
+          </div>
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Fecha <span class="text-danger">*</span></label>
+              <input type="date" class="form-control" name="fecha" [(ngModel)]="citaActual.fecha" required>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Hora <span class="text-danger">*</span></label>
+              <input type="time" class="form-control" name="hora" [(ngModel)]="citaActual.hora" required>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Tipo de Consulta <span class="text-danger">*</span></label>
+            <select class="form-select" name="tipo_consulta" [(ngModel)]="citaActual.tipo_consulta" required>
+              <option value="General">Consulta General</option>
+              <option value="Vacunación">Vacunación</option>
+              <option value="Desparasitación">Desparasitación</option>
+              <option value="Cirugía">Cirugía</option>
+              <option value="Urgencia">Urgencia Médica</option>
+              <option value="Estética">Estética / Baño</option>
+              <option value="Control">Control de Rutina</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Veterinario de Preferencia (Opcional)</label>
+            <select class="form-select" name="veterinario_id" [(ngModel)]="citaActual.veterinario_id">
+              <option value="" selected>Cualquier Veterinario Disponible</option>
+              <option *ngFor="let v of veterinarios" [value]="v.id">Dr(a). {{ v.nombre }} {{ v.apellidos }}</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Motivo de la cita / Síntomas</label>
+            <textarea class="form-control" name="motivo" rows="2" [(ngModel)]="citaActual.motivo" placeholder="Ej. Ha estado decaído, revisión mensual..."></textarea>
+          </div>
+          
+          <div class="text-end mt-4">
+            <button type="button" class="btn btn-light me-2 fw-bold px-4" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn-primary fw-bold px-4 shadow-sm" [disabled]="!formCita.valid">
+              <i class="bi bi-calendar-check"></i> Agendar Cita
             </button>
-
-            <!-- Completar: solo si está confirmada -->
-            <button *ngIf="cita.estado === 'confirmada'" (click)="actualizarEstado(cita.id, 'completada')"
-              class="btn btn-sm btn-primary me-1">
-              <i class="bi bi-clipboard-check me-1"></i>Finalizar
-            </button>
-
-            <!-- Cancelar: si está pendiente o confirmada -->
-            <button *ngIf="cita.estado === 'pendiente' || cita.estado === 'confirmada'"
-              (click)="actualizarEstado(cita.id, 'cancelada')" class="btn btn-sm btn-danger">
-              <i class="bi bi-x-circle me-1"></i>Cancelar
-            </button>
-
-            <!-- Completada/Cancelada: sin acciones -->
-            <span *ngIf="cita.estado === 'completada' || cita.estado === 'cancelada'" class="text-muted small">—</span>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+          </div>
+        </form>
+      </div>
+    </div>
   </div>
-</ng-container>
+</div>
+
+<!-- Modal Asignar Veterinario (Admin) -->
+<div class="modal fade" id="modalAsignarVet" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-sm modal-dialog-centered">
+    <div class="modal-content border-0 rounded-4 shadow-lg">
+      <div class="modal-header bg-primary text-white border-0 rounded-top-4">
+        <h5 class="modal-title fw-bold"><i class="bi bi-person-badge"></i> Asignar Médico</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-4">
+        <form (ngSubmit)="asignarVeterinario()" #formVet="ngForm">
+          <div class="mb-4">
+            <label class="form-label fw-semibold text-muted">Veterinario a Cargo:</label>
+            <select class="form-select border-primary" name="nuevoVetId" [(ngModel)]="nuevoVetId" required>
+              <option value="" disabled>Seleccione un doctor...</option>
+              <option *ngFor="let v of veterinarios" [value]="v.id">Dr(a). {{ v.nombre }} {{ v.apellidos }}</option>
+            </select>
+          </div>
+          <div class="text-end">
+            <button type="button" class="btn btn-light btn-sm me-2 fw-bold" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn-primary btn-sm fw-bold shadow-sm px-3" [disabled]="!formVet.valid">Asignar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

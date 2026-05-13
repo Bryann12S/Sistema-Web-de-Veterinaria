@@ -1,74 +1,159 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { NgClass } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { finalize } from 'rxjs/operators';
 
 import { Cita } from '../../../services/cita';
 import { Auth } from '../../../services/auth';
+import { Mascota } from '../../../services/mascota';
+import { UsuarioService } from '../../../services/usuario.service';
+
+declare var bootstrap: any;
 
 @Component({
   selector: 'app-cita-list',
   standalone: true,
-  imports: [NgClass, CommonModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './cita-list.html',
   styleUrl: './cita-list.css',
 })
 export class CitaList implements OnInit {
   citas: any[] = [];
+  mascotas: any[] = [];
+  veterinarios: any[] = [];
   rol: string = '';
-  cargando: boolean = false;
-  errorMsg: string = '';
+  
+  isLoading = true;
+  showToast = false;
+  toastMessage = '';
+
+  // Formulario cita
+  citaActual: any = {
+    fecha: '', hora: '', mascota_id: '', motivo: '', tipo_consulta: 'General', veterinario_id: ''
+  };
+  
+  // Asignar Veterinario
+  citaSeleccionadaParaVet: any = null;
+  nuevoVetId: string = '';
 
   constructor(
     private citaService: Cita,
     private authService: Auth,
-    private cdr: ChangeDetectorRef  // <-- detecta cambios manualmente si Angular no lo hace
+    private mascotaService: Mascota,
+    private usuarioService: UsuarioService,
+    private cdr: ChangeDetectorRef
   ) { }
 
   ngOnInit() {
     this.rol = (this.authService.getRol() ?? '').toLowerCase().trim();
-    this.cargarCitas();
+    this.cargarDatos();
   }
 
-  cargarCitas() {
-    this.cargando = true;
-    this.errorMsg = '';
-    this.cdr.detectChanges(); // Muestra el spinner de inmediato
-
-    this.citaService.getCitas().pipe(
-      // finalize garantiza que cargando=false SIEMPRE, incluso si hay error inesperado
-      finalize(() => {
-        this.cargando = false;
-        this.cdr.detectChanges(); // Fuerza la actualización de la vista
-      })
-    ).subscribe({
+  cargarDatos() {
+    this.isLoading = true;
+    this.citaService.getCitas().subscribe({
       next: (data) => {
         this.citas = data;
+        this.isLoading = false;
+        this.cdr.detectChanges();
       },
       error: (err) => {
-        this.errorMsg = err.error?.error || err.error?.message || 'Error al cargar las citas. Verifica tu sesión.';
-      }
-    });
-  }
-
-  // Solo veterinario puede cambiar estado
-  actualizarEstado(id: number, nuevoEstado: string) {
-    if (this.rol !== 'veterinario') return;
-
-    this.citaService.actualizarCita(id, { estado: nuevoEstado }).subscribe({
-      next: () => this.cargarCitas(),
-      error: (err) => {
-        this.errorMsg = err.error?.message || 'Error al actualizar el estado.';
+        this.mostrarAviso(err.error?.error || 'Error al cargar las citas.');
+        this.isLoading = false;
         this.cdr.detectChanges();
       }
     });
+
+    if (this.rol === 'cliente') {
+      this.mascotaService.getMascotas().subscribe(data => {
+        this.mascotas = data;
+      });
+    }
+    
+    // Todos podrian necesitar ver a los veterinarios (cliente para preferido, admin para asignar)
+    this.usuarioService.obtenerVeterinarios().subscribe((data: any) => {
+      this.veterinarios = data;
+    });
   }
 
-  // Helpers de vista
-  esVeterinario(): boolean { return this.rol === 'veterinario'; }
-  esAdmin(): boolean { return this.rol === 'admin'; }
-  esCliente(): boolean { return this.rol === 'cliente'; }
+  abrirModalAgendar() {
+    this.citaActual = { fecha: '', hora: '', mascota_id: '', motivo: '', tipo_consulta: 'General', veterinario_id: '' };
+    const modal = new bootstrap.Modal(document.getElementById('modalCita'));
+    modal.show();
+  }
+
+  guardarCita() {
+    this.citaService.agendarCita(this.citaActual).subscribe({
+      next: () => {
+        this.cerrarModal('modalCita');
+        this.mostrarAviso('Cita agendada exitosamente.');
+        this.cargarDatos();
+      },
+      error: (err) => alert(err.error?.error || 'Error al agendar cita')
+    });
+  }
+
+  actualizarEstado(id: number, nuevoEstado: string) {
+    let mensajeConfirmacion = `¿Estás seguro de marcar esta cita como ${nuevoEstado.toUpperCase()}?`;
+    if (nuevoEstado === 'cancelada' && this.rol === 'cliente') {
+      mensajeConfirmacion = '¿Estás seguro de que deseas cancelar tu cita?';
+    }
+
+    if (confirm(mensajeConfirmacion)) {
+      this.citaService.actualizarEstado(id, nuevoEstado).subscribe({
+        next: () => {
+          this.mostrarAviso(`Cita marcada como ${nuevoEstado}.`);
+          this.cargarDatos();
+        },
+        error: (err) => alert(err.error?.error || 'Error al actualizar estado')
+      });
+    }
+  }
+
+  abrirModalAsignarVet(cita: any) {
+    this.citaSeleccionadaParaVet = cita;
+    this.nuevoVetId = cita.veterinario_id || '';
+    const modal = new bootstrap.Modal(document.getElementById('modalAsignarVet'));
+    modal.show();
+  }
+
+  asignarVeterinario() {
+    this.citaService.asignarVeterinario(this.citaSeleccionadaParaVet.id, parseInt(this.nuevoVetId)).subscribe({
+      next: () => {
+        this.cerrarModal('modalAsignarVet');
+        this.mostrarAviso('Veterinario asignado exitosamente.');
+        this.cargarDatos();
+      },
+      error: (err) => alert(err.error?.error || 'Error al asignar veterinario')
+    });
+  }
+
+  eliminarCita(id: number) {
+    if (confirm('¿Estás seguro de que deseas eliminar permanentemente esta cita del sistema?')) {
+      this.citaService.eliminarCita(id).subscribe({
+        next: () => {
+          this.mostrarAviso('Cita eliminada correctamente.');
+          this.cargarDatos();
+        },
+        error: (err) => alert(err.error?.error || 'Error al eliminar cita')
+      });
+    }
+  }
+
+  cerrarModal(id: string) {
+    const modal = bootstrap.Modal.getInstance(document.getElementById(id));
+    if (modal) modal.hide();
+  }
+
+  mostrarAviso(mensaje: string) {
+    this.toastMessage = mensaje;
+    this.showToast = true;
+    this.cdr.detectChanges();
+    setTimeout(() => {
+      this.showToast = false;
+      this.cdr.detectChanges();
+    }, 3000);
+  }
 
   badgeEstado(estado: string): string {
     const mapa: Record<string, string> = {

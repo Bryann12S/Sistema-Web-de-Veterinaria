@@ -20,9 +20,16 @@ export class Cita {
     return this.http.post(this.apiUrl, cita);
   }
 
-  //put para verterinario/admin (cambiar a 'confirmada', 'completada' o 'cancelada')
-  actualizarCita(id: number, cita: any): Observable<any> {
-    return this.http.put(`${this.apiUrl}/${id}/estado`, cita);
+  actualizarEstado(id: number, estado: string): Observable<any> {
+    return this.http.put(`${this.apiUrl}/${id}/estado`, { estado });
+  }
+
+  asignarVeterinario(id: number, veterinario_id: number): Observable<any> {
+    return this.http.put(`${this.apiUrl}/${id}/veterinario`, { veterinario_id });
+  }
+
+  eliminarCita(id: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/${id}`);
   }
 
 }

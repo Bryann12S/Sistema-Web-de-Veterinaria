@@ -24,4 +24,8 @@ export class UsuarioService {
   cambiarEstado(id: number, estado: string) {
     return this.http.put(`${this.API_URL}/${id}/estado`, { estado });
   }
+
+  obtenerVeterinarios() {
+    return this.http.get(`${this.API_URL}/veterinarios`);
+  }
 }

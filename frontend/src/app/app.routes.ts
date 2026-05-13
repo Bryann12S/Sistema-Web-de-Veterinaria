@@ -7,7 +7,6 @@ import { Login } from './pages/login/login';
 import { Dashboard } from './pages/dashboard/dashboard';
 import { MascotaList } from './pages/mascotas/mascota-list/mascota-list';
 import { MascotaForm } from './pages/mascotas/mascota-form/mascota-form';
-import { CitaForm } from './pages/cita/cita-form/cita-form';
 import { CitaList } from './pages/cita/cita-list/cita-list';
 import { HistorialForm } from './pages/historial/historial-form/historial-form';
 import { HistorialList } from './pages/historial/historial-list/historial-list';
@@ -33,13 +32,6 @@ export const routes: Routes = [
             { path: 'mascotas-list', component: MascotaList },
             { path: 'mascotas-form', component: MascotaForm },
             { path: 'mascotas/editar/:id', component: MascotaForm },
-
-            // Citas: agendar → solo cliente
-            {
-                path: 'cita-form',
-                component: CitaForm,
-                canActivate: [roleGuard('cliente')]
-            },
 
             // Citas: lista → cliente (sus citas), veterinario y admin (todas)
             {
