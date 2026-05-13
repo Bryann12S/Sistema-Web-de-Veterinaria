@@ -20,6 +20,10 @@ export class Cita {
     return this.http.post(this.apiUrl, cita);
   }
 
+  getHorasOcupadas(fecha: string): Observable<any> {
+    return this.http.get(`${this.apiUrl}/ocupadas/${fecha}`);
+  }
+
   actualizarEstado(id: number, estado: string): Observable<any> {
     return this.http.put(`${this.apiUrl}/${id}/estado`, { estado });
   }

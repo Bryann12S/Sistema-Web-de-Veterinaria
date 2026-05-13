@@ -136,15 +136,52 @@
               <option *ngFor="let m of mascotas" [value]="m.id">{{ m.nombre }} ({{ m.especie }})</option>
             </select>
           </div>
-          <div class="row g-3 mb-3">
-            <div class="col-md-6">
-              <label class="form-label fw-semibold">Fecha <span class="text-danger">*</span></label>
-              <input type="date" class="form-control" name="fecha" [(ngModel)]="citaActual.fecha" required>
+          <div class="mb-4">
+            <label class="form-label fw-semibold">Horario de Atención (Seleccione un bloque) <span class="text-danger">*</span></label>
+            <div class="table-responsive">
+              <table class="table table-bordered text-center align-middle" style="min-width: 500px;">
+                <thead class="table-light">
+                  <tr>
+                    <th *ngFor="let dia of diasSemana" class="py-2">
+                      <div class="fw-bold">{{ dia.diaNombre }} {{ dia.diaNum }}</div>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let hora of horariosDisponibles">
+                    <td *ngFor="let dia of diasSemana" class="p-1" style="width: 20%;">
+                      <button type="button" class="btn btn-sm w-100 rounded-2 position-relative"
+                              style="height: 50px;"
+                              [ngClass]="citaActual.fecha === dia.fecha && citaActual.hora === hora ? 'btn-primary shadow-sm' : 'btn-outline-primary'"
+                              [disabled]="isSlotDeshabilitadoGrilla(dia.fecha, hora)"
+                              (click)="seleccionarSlot(dia.fecha, hora)">
+                        
+                        <div class="fw-bold" style="font-size: 0.85rem;">{{ formatSlot(hora) }}</div>
+                        
+                        <!-- Badges de estado del slot -->
+                        <div *ngIf="isSlotOcupado(dia.fecha, hora)" class="position-absolute bottom-0 start-50 translate-middle-x w-100 bg-danger text-white rounded-bottom" style="font-size: 0.65rem; padding: 1px 0;">
+                          Ocupado
+                        </div>
+                        <div *ngIf="isSlotPasado(dia.fecha, hora) && !isSlotOcupado(dia.fecha, hora)" class="position-absolute bottom-0 start-50 translate-middle-x w-100 bg-secondary text-white rounded-bottom" style="font-size: 0.65rem; padding: 1px 0;">
+                          Pasado
+                        </div>
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
-            <div class="col-md-6">
-              <label class="form-label fw-semibold">Hora <span class="text-danger">*</span></label>
-              <input type="time" class="form-control" name="hora" [(ngModel)]="citaActual.hora" required>
+            
+            <!-- Mensaje de selección -->
+            <div class="mt-2 text-center" *ngIf="citaActual.fecha && citaActual.hora">
+              <span class="badge bg-success bg-opacity-10 text-success border border-success px-3 py-2 fs-6 rounded-pill">
+                <i class="bi bi-check-circle-fill me-1"></i> Seleccionado: {{ citaActual.fecha }} de {{ formatSlot(citaActual.hora) }}
+              </span>
             </div>
+
+            <!-- Validaciones invisibles requeridas para Angular Forms -->
+            <input type="hidden" name="fecha" [(ngModel)]="citaActual.fecha" required>
+            <input type="hidden" name="hora" [(ngModel)]="citaActual.hora" required>
           </div>
           <div class="mb-3">
             <label class="form-label fw-semibold">Tipo de Consulta <span class="text-danger">*</span></label>

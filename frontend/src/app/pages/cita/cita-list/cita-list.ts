@@ -1,7 +1,6 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
 
 import { Cita } from '../../../services/cita';
 import { Auth } from '../../../services/auth';
@@ -13,7 +12,7 @@ declare var bootstrap: any;
 @Component({
   selector: 'app-cita-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule],
   templateUrl: './cita-list.html',
   styleUrl: './cita-list.css',
 })
@@ -31,6 +30,11 @@ export class CitaList implements OnInit {
   citaActual: any = {
     fecha: '', hora: '', mascota_id: '', motivo: '', tipo_consulta: 'General', veterinario_id: ''
   };
+  
+  // Time slots
+  horariosDisponibles = ['08:00', '09:00', '10:00', '11:00', '13:00', '14:00', '15:00', '16:00'];
+  diasSemana: any[] = [];
+  ocupadasPorFecha: { [fecha: string]: string[] } = {};
   
   // Asignar Veterinario
   citaSeleccionadaParaVet: any = null;
@@ -78,8 +82,78 @@ export class CitaList implements OnInit {
 
   abrirModalAgendar() {
     this.citaActual = { fecha: '', hora: '', mascota_id: '', motivo: '', tipo_consulta: 'General', veterinario_id: '' };
+    this.ocupadasPorFecha = {};
+    this.generarDiasSemana();
     const modal = new bootstrap.Modal(document.getElementById('modalCita'));
     modal.show();
+  }
+
+  formatearFechaLocal(date: Date): string {
+    const yyyy = date.getFullYear();
+    const mm = String(date.getMonth() + 1).padStart(2, '0');
+    const dd = String(date.getDate()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}`;
+  }
+
+  generarDiasSemana() {
+    this.diasSemana = [];
+    const hoy = new Date();
+    
+    let diasAgregados = 0;
+    let fechaIteracion = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate()); // Medianoche local
+    
+    while (diasAgregados < 5) { // Lunes a Viernes de esta/próxima semana
+      const diaSemana = fechaIteracion.getDay(); 
+      if (diaSemana !== 0 && diaSemana !== 6) {
+        
+        const fechaStr = this.formatearFechaLocal(fechaIteracion);
+        const nombresDias = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+        
+        this.diasSemana.push({
+          fecha: fechaStr,
+          diaNombre: nombresDias[diaSemana],
+          diaNum: fechaIteracion.getDate()
+        });
+
+        // Consultamos la disponibilidad por cada día (no es lo más óptimo pero funciona bien para 5 días)
+        this.citaService.getHorasOcupadas(fechaStr).subscribe({
+          next: (ocupadas) => {
+            this.ocupadasPorFecha[fechaStr] = ocupadas;
+          }
+        });
+
+        diasAgregados++;
+      }
+      fechaIteracion.setDate(fechaIteracion.getDate() + 1);
+    }
+  }
+
+  isSlotOcupado(fecha: string, horaStr: string): boolean {
+    return this.ocupadasPorFecha[fecha] && this.ocupadasPorFecha[fecha].includes(horaStr);
+  }
+
+  isSlotPasado(fecha: string, horaStr: string): boolean {
+    const hoy = new Date();
+    const [hora, min] = horaStr.split(':').map(Number);
+    if (fecha === this.formatearFechaLocal(hoy) && hoy.getHours() >= hora) {
+      return true;
+    }
+    return false;
+  }
+
+  isSlotDeshabilitadoGrilla(fecha: string, horaStr: string): boolean {
+    return this.isSlotOcupado(fecha, horaStr) || this.isSlotPasado(fecha, horaStr);
+  }
+
+  seleccionarSlot(fecha: string, horaStr: string) {
+    if (this.isSlotDeshabilitadoGrilla(fecha, horaStr)) return;
+    this.citaActual.fecha = fecha;
+    this.citaActual.hora = horaStr;
+  }
+
+  formatSlot(hora: string): string {
+    const h = parseInt(hora.split(':')[0], 10);
+    return `${h}:00 - ${h + 1}:00`;
   }
 
   guardarCita() {
