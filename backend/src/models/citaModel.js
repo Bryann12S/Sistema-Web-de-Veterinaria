@@ -3,33 +3,36 @@ const db = require('../config/db');
 const Cita = {
     getAll: async () => {
         const [rows] = await db.query(`
-            SELECT c.*, m.nombre AS nombre_mascota, u.nombre AS duenio_nombre, v.nombre AS veterinario_nombre
+            SELECT c.*, m.nombre AS nombre_mascota, u.nombre AS duenio_nombre, v.nombre AS veterinario_nombre, hm.id AS historial_id
             FROM citas c 
             JOIN mascotas m ON c.mascota_id = m.id
             LEFT JOIN usuarios u ON m.user_id = u.id
             LEFT JOIN usuarios v ON c.veterinario_id = v.id
+            LEFT JOIN historial_medico hm ON hm.cita_id = c.id
             ORDER BY c.fecha DESC
         `);
         return rows;
     },
     getById: async (id) => {
         const [rows] = await db.query(`
-            SELECT c.*, m.nombre AS nombre_mascota, u.nombre AS duenio_nombre, v.nombre AS veterinario_nombre
+            SELECT c.*, m.nombre AS nombre_mascota, u.nombre AS duenio_nombre, v.nombre AS veterinario_nombre, hm.id AS historial_id
             FROM citas c 
             JOIN mascotas m ON c.mascota_id = m.id
             LEFT JOIN usuarios u ON m.user_id = u.id
             LEFT JOIN usuarios v ON c.veterinario_id = v.id
+            LEFT JOIN historial_medico hm ON hm.cita_id = c.id
             WHERE c.id = ?
         `, [id]);
         return rows[0];
     },
     getByUser: async (userId) => {
         const [rows] = await db.query(`
-            SELECT c.*, m.nombre AS nombre_mascota, u.nombre AS duenio_nombre, v.nombre AS veterinario_nombre
+            SELECT c.*, m.nombre AS nombre_mascota, u.nombre AS duenio_nombre, v.nombre AS veterinario_nombre, hm.id AS historial_id
             FROM citas c
             JOIN mascotas m ON c.mascota_id = m.id
             LEFT JOIN usuarios u ON m.user_id = u.id
             LEFT JOIN usuarios v ON c.veterinario_id = v.id
+            LEFT JOIN historial_medico hm ON hm.cita_id = c.id
             WHERE m.user_id = ?
             ORDER BY c.fecha DESC
         `, [userId]);
@@ -37,10 +40,11 @@ const Cita = {
     },
     getByVeterinario: async (veterinarioId) => {
         const [rows] = await db.query(`
-            SELECT c.*, m.nombre AS nombre_mascota, u.nombre AS duenio_nombre
+            SELECT c.*, m.nombre AS nombre_mascota, u.nombre AS duenio_nombre, hm.id AS historial_id
             FROM citas c
             JOIN mascotas m ON c.mascota_id = m.id
             LEFT JOIN usuarios u ON m.user_id = u.id
+            LEFT JOIN historial_medico hm ON hm.cita_id = c.id
             WHERE c.veterinario_id = ?
             ORDER BY c.fecha DESC
         `, [veterinarioId]);
@@ -48,11 +52,12 @@ const Cita = {
     },
     getByfecha: async (fecha) => {
         const [rows] = await db.query(`
-            SELECT c.*, m.nombre AS nombre_mascota, u.nombre AS duenio_nombre, v.nombre AS veterinario_nombre
+            SELECT c.*, m.nombre AS nombre_mascota, u.nombre AS duenio_nombre, v.nombre AS veterinario_nombre, hm.id AS historial_id
             FROM citas c
             JOIN mascotas m ON c.mascota_id = m.id
             LEFT JOIN usuarios u ON m.user_id = u.id
             LEFT JOIN usuarios v ON c.veterinario_id = v.id
+            LEFT JOIN historial_medico hm ON hm.cita_id = c.id
             WHERE DATE(c.fecha) = ?
             ORDER BY c.hora
         `, [fecha]);
