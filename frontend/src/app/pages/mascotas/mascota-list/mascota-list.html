@@ -1,57 +1,164 @@
 <div class="container mt-4">
   <div class="d-flex justify-content-between align-items-center mb-4">
     <h2 class="fw-bold text-primary">
-      <i class="bi bi-dog"></i> 
-      {{ rol === 'cliente' ? 'Mis Mascotas' : 'Pacientes Registrados' }}
+      <i class="bi bi-stars"></i> 
+      {{ rol === 'cliente' ? 'Mis Mascotas' : 'Lista de Pacientes' }}
     </h2>
-    <!-- Solo el cliente o admin puede registrar mascotas nuevas según tu lógica -->
-    <button class="btn btn-success" *ngIf="rol !== 'veterinario'" [routerLink]="['/app/mascotas-form']">
-      <i class="bi bi-plus-lg"></i> Nueva Mascota
+    <button class="btn btn-primary rounded-pill shadow-sm fw-bold px-4" *ngIf="rol === 'cliente'" (click)="abrirModalCrear()">
+      <i class="bi bi-plus-circle me-1"></i> Añadir Mascota
     </button>
   </div>
 
-  <div class="card shadow-sm">
+  <!-- PANTALLA DE CARGA -->
+  <div *ngIf="isLoading" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+      <span class="visually-hidden">Cargando...</span>
+    </div>
+    <h5 class="mt-3 text-muted fw-bold">Cargando mascotas...</h5>
+  </div>
+
+  <div class="card shadow border-0 rounded-4" *ngIf="!isLoading">
     <div class="card-body p-0">
-      <table class="table table-hover mb-0">
-        <thead class="table-light">
-          <tr>
-            <th>Nombre</th>
-            <th>Especie</th>
-            <th>Raza</th>
-            <th *ngIf="rol !== 'cliente'">Dueño</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let mascota of mascotas">
-            <td class="fw-bold">{{ mascota.nombre }}</td>
-            <td><span class="badge bg-info text-dark">{{ mascota.especie }}</span></td>
-            <td>{{ mascota.raza }}</td>
-            <td *ngIf="rol !== 'cliente'">{{ mascota.duenio_nombre || 'Ver en detalle' }}</td>
-            <td class="text-center">
-              <div class="btn-group">
-                <button class="btn btn-sm btn-outline-primary" [routerLink]="['/app/historial-list', mascota.id]">
-                  <i class="bi bi-file-medical"></i>
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th class="ps-4">Paciente</th>
+              <th>Especie / Raza</th>
+              <th>Estado</th>
+              <th *ngIf="rol !== 'cliente'">Dueño</th>
+              <th class="text-center pe-4">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let mascota of mascotas">
+              <td class="ps-4">
+                <div class="fw-bold fs-5 text-dark">{{ mascota.nombre }}</div>
+                <small class="text-muted"><i class="bi bi-gender-ambiguous"></i> {{ mascota.sexo || 'N/A' }}</small>
+              </td>
+              <td>
+                <span class="badge bg-info bg-opacity-25 text-info border border-info rounded-pill px-3">{{ mascota.especie }}</span>
+                <div class="text-muted small mt-1">{{ mascota.raza }}</div>
+              </td>
+              <td>
+                <span class="badge rounded-pill" [ngClass]="mascota.estado === 'activa' ? 'bg-success' : 'bg-secondary'">
+                  {{ mascota.estado | titlecase }}
+                </span>
+              </td>
+              <td *ngIf="rol !== 'cliente'">
+                <div class="fw-bold">{{ mascota.duenio_nombre }} {{ mascota.duenio_apellidos }}</div>
+                <small class="text-muted"><i class="bi bi-envelope"></i> {{ mascota.duenio_email }}</small>
+              </td>
+              <td class="text-center pe-4">
+                <button class="btn btn-sm btn-light rounded-circle shadow-sm me-2 text-primary" title="Historial Médico" [routerLink]="['/app/historial-list', mascota.id]">
+                  <i class="bi bi-file-medical-fill fs-5"></i>
                 </button>
+                <button class="btn btn-sm btn-light rounded-circle shadow-sm me-2 text-warning" *ngIf="puedeEditar()" title="Editar Mascota" (click)="abrirModalEditar(mascota)">
+                  <i class="bi bi-pencil-fill fs-5"></i>
+                </button>
+                <button class="btn btn-sm btn-light rounded-circle shadow-sm text-danger" *ngIf="puedeEliminar()" title="Eliminar Mascota" (click)="eliminarMascota(mascota.id)">
+                  <i class="bi bi-trash-fill fs-5"></i>
+                </button>
+              </td>
+            </tr>
+            <tr *ngIf="mascotas.length === 0">
+              <td [attr.colspan]="rol === 'cliente' ? 4 : 5" class="text-center py-5 text-muted">
+                <i class="bi bi-info-circle fs-1 d-block mb-2"></i>
+                No se encontraron mascotas registradas.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 
-                <button class="btn btn-sm btn-outline-warning" 
-                        [routerLink]="['/app/mascotas/editar', mascota.id]">
-                  <i class="bi bi-pencil-square"></i>
-                </button>
+  <!-- AVISO TOAST -->
+  <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1055">
+    <div class="toast align-items-center text-white bg-success border-0 shadow-lg" 
+         [class.show]="showToast" role="alert" aria-live="assertive" aria-atomic="true" 
+         style="transition: opacity 0.3s ease-in-out; opacity: {{showToast ? 1 : 0}}; pointer-events: {{showToast ? 'auto' : 'none'}};">
+      <div class="d-flex">
+        <div class="toast-body fw-bold">
+          <i class="bi bi-check-circle-fill me-2 fs-5 vertical-align-middle"></i> {{ toastMessage }}
+        </div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" (click)="showToast = false" aria-label="Close"></button>
+      </div>
+    </div>
+  </div>
+</div>
 
-                <button class="btn btn-sm btn-outline-danger" 
-                        *ngIf="rol === 'admin'"
-                        (click)="eliminarMascota(mascota.id)">
-                  <i class="bi bi-trash"></i>
-                </button>
+<!-- Modal Mascota -->
+<div class="modal fade" id="modalMascota" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content border-0 rounded-4 shadow-lg">
+      <div class="modal-header bg-primary text-white border-0 rounded-top-4">
+        <h5 class="modal-title fw-bold"><i class="bi" [ngClass]="esEdicion ? 'bi-pencil-square' : 'bi-plus-circle'"></i> {{ esEdicion ? 'Editar Mascota' : 'Registrar Nueva Mascota' }}</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-4">
+        <form (ngSubmit)="guardarMascota()" #formMascota="ngForm">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Nombre <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" name="nombre" [(ngModel)]="mascotaActual.nombre" required>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label fw-semibold">Especie <span class="text-danger">*</span></label>
+              <select class="form-select" name="especie" [(ngModel)]="mascotaActual.especie" required>
+                <option value="Perro">Perro</option>
+                <option value="Gato">Gato</option>
+                <option value="Ave">Ave</option>
+                <option value="Exótico">Exótico</option>
+              </select>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label fw-semibold">Raza <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" name="raza" [(ngModel)]="mascotaActual.raza" required>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label fw-semibold">Sexo</label>
+              <select class="form-select" name="sexo" [(ngModel)]="mascotaActual.sexo">
+                <option value="Macho">Macho</option>
+                <option value="Hembra">Hembra</option>
+                <option value="Desconocido">Desconocido</option>
+              </select>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label fw-semibold">Color</label>
+              <input type="text" class="form-control" name="color" [(ngModel)]="mascotaActual.color">
+            </div>
+            <div class="col-md-3">
+              <label class="form-label fw-semibold">Peso (kg)</label>
+              <input type="number" step="0.1" class="form-control" name="peso" [(ngModel)]="mascotaActual.peso">
+            </div>
+            <div class="col-md-3">
+              <label class="form-label fw-semibold">F. Nacimiento</label>
+              <input type="date" class="form-control" name="fecha_nacimiento" [(ngModel)]="mascotaActual.fecha_nacimiento">
+            </div>
+            <div class="col-md-6 d-flex align-items-end">
+              <div class="form-check form-switch fs-5">
+                <input class="form-check-input" type="checkbox" id="esterilizadoCheck" name="esterilizado" [(ngModel)]="mascotaActual.esterilizado">
+                <label class="form-check-label ms-2 fs-6 mt-1" for="esterilizadoCheck">¿Mascota Esterilizada?</label>
               </div>
-          </td>
-          </tr>
-          <tr *ngIf="mascotas.length === 0">
-            <td colspan="5" class="text-center py-4 text-muted">No se encontraron mascotas registradas.</td>
-          </tr>
-        </tbody>
-      </table>
+            </div>
+            <div class="col-md-6" *ngIf="esEdicion && rol !== 'cliente'">
+              <label class="form-label fw-semibold text-danger">Estado (Solo Admin/Vet)</label>
+              <select class="form-select border-danger" name="estado" [(ngModel)]="mascotaActual.estado">
+                <option value="activa">Activa</option>
+                <option value="inactiva">Inactiva</option>
+                <option value="fallecida">Fallecida</option>
+              </select>
+            </div>
+          </div>
+          <div class="text-end mt-4">
+            <button type="button" class="btn btn-light me-2 fw-bold px-4" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn-primary fw-bold px-4 shadow-sm" [disabled]="!formMascota.valid">
+              <i class="bi" [ngClass]="esEdicion ? 'bi-save' : 'bi-plus-lg'"></i> {{ esEdicion ? 'Guardar Cambios' : 'Registrar Mascota' }}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   </div>
 </div>
