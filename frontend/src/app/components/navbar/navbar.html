@@ -44,23 +44,7 @@
           </a>
         </li>
 
-        <!-- Historial Médico -->
-        <li class="nav-item" *ngIf="rol === 'admin' || rol === 'veterinario'">
-          <a class="nav-link d-flex align-items-center" routerLinkActive="active" routerLink="/app/historial-form">
-            <i class="bi bi-clipboard-data me-1"></i> Crear Historial
-          </a>
-        </li>
 
-        <!-- Vacunas (Dropdown) -->
-        <li class="nav-item dropdown" *ngIf="rol === 'admin' || rol === 'veterinario'">
-          <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            <i class="bi bi-shield-plus me-1"></i> Vacunación
-          </a>
-          <ul class="dropdown-menu">
-            <li><a class="dropdown-item" routerLink="/app/vacunas-list"><i class="bi bi-list-check me-2"></i> Registro de Vacunas</a></li>
-            <li><a class="dropdown-item" routerLink="/app/vacunas-proximas"><i class="bi bi-calendar-event me-2"></i> Próximas Dosis</a></li>
-          </ul>
-        </li>
 
       </ul>
 

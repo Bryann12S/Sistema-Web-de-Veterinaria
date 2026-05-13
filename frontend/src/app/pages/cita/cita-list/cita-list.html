@@ -70,9 +70,9 @@
                   <button class="btn btn-sm btn-light rounded-circle shadow-sm text-info me-1" *ngIf="cita.estado === 'pendiente'" title="Confirmar Cita" (click)="actualizarEstado(cita.id, 'confirmada')">
                     <i class="bi bi-check-circle-fill fs-5"></i>
                   </button>
-                  <!-- Cambiar a Completada -->
-                  <button class="btn btn-sm btn-light rounded-circle shadow-sm text-success me-1" *ngIf="cita.estado === 'confirmada'" title="Finalizar Consulta" (click)="actualizarEstado(cita.id, 'completada')">
-                    <i class="bi bi-clipboard-check-fill fs-5"></i>
+                  <!-- Iniciar Atención Médica -->
+                  <button class="btn btn-sm btn-primary rounded-circle shadow-sm text-white me-1" *ngIf="cita.estado === 'confirmada' || cita.estado === 'en_consulta'" title="Atención Médica" (click)="abrirModalAtencion(cita)">
+                    <i class="bi bi-heart-pulse-fill fs-5"></i>
                   </button>
                   <!-- Cancelar -->
                   <button class="btn btn-sm btn-light rounded-circle shadow-sm text-warning me-1" *ngIf="cita.estado === 'pendiente' || cita.estado === 'confirmada'" title="Cancelar Cita" (click)="actualizarEstado(cita.id, 'cancelada')">
@@ -82,18 +82,10 @@
                   <button class="btn btn-sm btn-light rounded-circle shadow-sm text-primary me-1" *ngIf="rol === 'admin' && (cita.estado === 'pendiente' || cita.estado === 'confirmada')" title="Asignar Veterinario" (click)="abrirModalAsignarVet(cita)">
                     <i class="bi bi-person-plus-fill fs-5"></i>
                   </button>
-                  <!-- Crear Historial Médico -->
-                  <button class="btn btn-sm btn-light rounded-circle shadow-sm text-primary me-1" *ngIf="cita.estado === 'completada' && !cita.historial_id" title="Completar Historial Médico" (click)="abrirModalHistorial(cita)">
-                    <i class="bi bi-file-earmark-medical-fill fs-5"></i>
-                  </button>
                   <!-- Historial Completado -->
-                  <span class="btn btn-sm btn-light rounded-circle shadow-sm text-success me-1" style="cursor: default;" *ngIf="cita.estado === 'completada' && cita.historial_id" title="Historial Médico Completado">
-                    <i class="bi bi-file-earmark-check-fill fs-5"></i>
+                  <span class="btn btn-sm btn-light rounded-circle shadow-sm text-success me-1" style="cursor: default;" *ngIf="cita.estado === 'completada' && cita.historial_id" title="Atención Médica Completada">
+                    <i class="bi bi-clipboard2-check-fill fs-5"></i>
                   </span>
-                  <!-- Aplicar Vacuna Manualmente -->
-                  <button class="btn btn-sm btn-light rounded-circle shadow-sm text-secondary me-1" *ngIf="cita.estado === 'completada'" title="Aplicar Vacuna" (click)="abrirModalVacuna(cita)">
-                    <i class="bi bi-syringe-fill fs-5"></i>
-                  </button>
                   <!-- Eliminar (Solo Admin) -->
                   <button class="btn btn-sm btn-light rounded-circle shadow-sm text-danger" *ngIf="rol === 'admin'" title="Eliminar Cita Permanentemente" (click)="eliminarCita(cita.id)">
                     <i class="bi bi-trash-fill fs-5"></i>
@@ -258,88 +250,115 @@
   </div>
 </div>
 
-<!-- Modal Historial Medico (Vet/Admin) -->
-<div class="modal fade" id="modalHistorial" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered">
+<!-- Modal Atencion Medica Unificada -->
+<div class="modal fade" id="modalAtencion" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+  <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
     <div class="modal-content border-0 rounded-4 shadow-lg">
-      <div class="modal-header bg-success text-white border-0 rounded-top-4">
-        <h5 class="modal-title fw-bold"><i class="bi bi-file-earmark-medical"></i> Completar Historial Médico</h5>
+      <div class="modal-header bg-primary text-white border-0 rounded-top-4">
+        <h5 class="modal-title fw-bold"><i class="bi bi-heart-pulse-fill"></i> Atención Médica</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <div class="modal-body p-4">
-        <div class="alert alert-info py-2" *ngIf="citaParaHistorial">
-          <strong>Paciente:</strong> {{ citaParaHistorial.nombre_mascota }} | 
-          <strong>Motivo:</strong> {{ citaParaHistorial.motivo || 'No especificado' }}
+      <div class="modal-body p-4 bg-light">
+        <div class="card shadow-sm border-0 mb-4 rounded-4">
+          <div class="card-body py-3">
+            <div class="row align-items-center" *ngIf="citaParaHistorial">
+              <div class="col-md-4 border-end">
+                <span class="text-muted d-block small fw-bold">Paciente</span>
+                <span class="fs-5 fw-bold text-dark"><i class="bi bi-stars text-warning"></i> {{ citaParaHistorial.nombre_mascota }}</span>
+              </div>
+              <div class="col-md-4 border-end">
+                <span class="text-muted d-block small fw-bold">Tipo de Consulta</span>
+                <span class="fs-6 text-dark">{{ citaParaHistorial.tipo_consulta }}</span>
+              </div>
+              <div class="col-md-4">
+                <span class="text-muted d-block small fw-bold">Motivo</span>
+                <span class="fs-6 text-dark text-truncate">{{ citaParaHistorial.motivo || 'No especificado' }}</span>
+              </div>
+            </div>
+          </div>
         </div>
-        <form (ngSubmit)="guardarHistorial()" #formHistorial="ngForm">
-          <div class="row">
-            <div class="col-md-6 mb-3">
-              <label class="form-label fw-semibold">Peso (kg)</label>
-              <input type="number" step="0.01" class="form-control" name="peso" [(ngModel)]="historialActual.peso" placeholder="Ej. 12.5">
-            </div>
-            <div class="col-md-6 mb-3">
-              <label class="form-label fw-semibold">Temperatura (°C)</label>
-              <input type="number" step="0.1" class="form-control" name="temperatura" [(ngModel)]="historialActual.temperatura" placeholder="Ej. 38.5">
-            </div>
-          </div>
-          <div class="mb-3">
-            <label class="form-label fw-semibold">Diagnóstico <span class="text-danger">*</span></label>
-            <textarea class="form-control" name="diagnostico" rows="2" [(ngModel)]="historialActual.diagnostico" required placeholder="Describe el diagnóstico..."></textarea>
-          </div>
-          <div class="mb-3">
-            <label class="form-label fw-semibold">Tratamiento</label>
-            <textarea class="form-control" name="tratamiento" rows="2" [(ngModel)]="historialActual.tratamiento" placeholder="Medicamentos, dosis, indicaciones..."></textarea>
-          </div>
-          <div class="mb-3">
-            <label class="form-label fw-semibold">Notas Adicionales</label>
-            <textarea class="form-control" name="notas" rows="2" [(ngModel)]="historialActual.notas" placeholder="Observaciones generales..."></textarea>
-          </div>
-          <div class="mb-3">
-            <label class="form-label fw-semibold">Próxima Visita (Opcional)</label>
-            <input type="date" class="form-control" name="proxima_visita" [(ngModel)]="historialActual.proxima_visita">
-          </div>
-          <div class="text-end mt-4">
-            <button type="button" class="btn btn-light me-2 fw-bold px-4" data-bs-dismiss="modal">Cancelar</button>
-            <button type="submit" class="btn btn-success fw-bold px-4 shadow-sm" [disabled]="!formHistorial.valid">
-              <i class="bi bi-save"></i> Guardar Historial
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  </div>
-</div>
 
-<!-- Modal Aplicar Vacuna -->
-<div class="modal fade" id="modalVacuna" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content border-0 rounded-4 shadow-lg">
-      <div class="modal-header bg-info text-white border-0 rounded-top-4">
-        <h5 class="modal-title fw-bold"><i class="bi bi-syringe"></i> Aplicar Vacuna</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body p-4">
-        <form (ngSubmit)="guardarVacuna()" #formVacuna="ngForm">
-          <div class="mb-3">
-            <label class="form-label fw-semibold">Nombre de la Vacuna <span class="text-danger">*</span></label>
-            <input type="text" class="form-control" name="nombre" [(ngModel)]="vacunaActual.nombre" required placeholder="Ej. Rabia, Parvovirus, Sextuple">
+        <form (ngSubmit)="guardarAtencion()" #formAtencion="ngForm">
+          <div class="row">
+            <!-- Columna Izquierda: Historial -->
+            <div class="col-lg-7">
+              <div class="card shadow-sm border-0 rounded-4 mb-3">
+                <div class="card-header bg-white border-bottom-0 pt-3 pb-0">
+                  <h6 class="fw-bold text-primary mb-0"><i class="bi bi-clipboard2-data me-2"></i> Evaluación Clínica</h6>
+                </div>
+                <div class="card-body">
+                  <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                      <label class="form-label fw-semibold small text-muted">Peso (kg)</label>
+                      <input type="number" step="0.01" class="form-control bg-light border-0" name="peso" [(ngModel)]="historialActual.peso" placeholder="Ej. 12.5">
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label fw-semibold small text-muted">Temperatura (°C)</label>
+                      <input type="number" step="0.1" class="form-control bg-light border-0" name="temperatura" [(ngModel)]="historialActual.temperatura" placeholder="Ej. 38.5">
+                    </div>
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label fw-semibold small text-muted">Diagnóstico <span class="text-danger">*</span></label>
+                    <textarea class="form-control bg-light border-0" name="diagnostico" rows="3" [(ngModel)]="historialActual.diagnostico" required placeholder="Describe el diagnóstico o hallazgos..."></textarea>
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label fw-semibold small text-muted">Tratamiento Prescrito</label>
+                    <textarea class="form-control bg-light border-0" name="tratamiento" rows="3" [(ngModel)]="historialActual.tratamiento" placeholder="Medicamentos, dosis, indicaciones..."></textarea>
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label fw-semibold small text-muted">Notas Adicionales</label>
+                    <textarea class="form-control bg-light border-0" name="notas" rows="2" [(ngModel)]="historialActual.notas" placeholder="Observaciones generales..."></textarea>
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label fw-semibold small text-muted">Próxima Visita (Opcional)</label>
+                    <input type="date" class="form-control bg-light border-0" name="proxima_visita" [(ngModel)]="historialActual.proxima_visita">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Columna Derecha: Vacunas -->
+            <div class="col-lg-5">
+              <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-header bg-white border-bottom-0 pt-3 pb-0 d-flex justify-content-between align-items-center">
+                  <h6 class="fw-bold text-info mb-0"><i class="bi bi-shield-plus me-2"></i> Inmunización</h6>
+                  <div class="form-check form-switch fs-5 mb-0">
+                    <input class="form-check-input" type="checkbox" id="checkVacuna" name="aplicarVacunaCheckbox" [(ngModel)]="aplicarVacunaCheckbox">
+                  </div>
+                </div>
+                <div class="card-body">
+                  <div class="alert alert-light text-muted small border-0 py-2 mb-3" *ngIf="!aplicarVacunaCheckbox">
+                    <i class="bi bi-info-circle me-1"></i> Activa el interruptor para registrar una vacuna en esta consulta.
+                  </div>
+                  
+                  <div *ngIf="aplicarVacunaCheckbox" class="animate__animated animate__fadeIn">
+                    <div class="mb-3">
+                      <label class="form-label fw-semibold small text-muted">Nombre de la Vacuna <span class="text-danger">*</span></label>
+                      <input type="text" class="form-control bg-light border-0" name="vacuna_nombre" [(ngModel)]="vacunaActual.nombre" [required]="aplicarVacunaCheckbox" placeholder="Ej. Rabia, Parvovirus">
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label fw-semibold small text-muted">Fecha de Aplicación <span class="text-danger">*</span></label>
+                      <input type="date" class="form-control bg-light border-0" name="fecha_aplicacion" [(ngModel)]="vacunaActual.fecha_aplicacion" [required]="aplicarVacunaCheckbox">
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label fw-semibold small text-muted">Próxima Dosis (Refuerzo)</label>
+                      <input type="date" class="form-control bg-light border-0" name="proxima_dosis" [(ngModel)]="vacunaActual.proxima_dosis">
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label fw-semibold small text-muted">Observaciones de Vacuna</label>
+                      <textarea class="form-control bg-light border-0" name="vacuna_observaciones" rows="2" [(ngModel)]="vacunaActual.observaciones" placeholder="Lote, marca..."></textarea>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-          <div class="mb-3">
-            <label class="form-label fw-semibold">Fecha de Aplicación <span class="text-danger">*</span></label>
-            <input type="date" class="form-control" name="fecha_aplicacion" [(ngModel)]="vacunaActual.fecha_aplicacion" required>
-          </div>
-          <div class="mb-3">
-            <label class="form-label fw-semibold">Próxima Dosis (Opcional)</label>
-            <input type="date" class="form-control" name="proxima_dosis" [(ngModel)]="vacunaActual.proxima_dosis">
-          </div>
-          <div class="mb-3">
-            <label class="form-label fw-semibold">Observaciones</label>
-            <textarea class="form-control" name="observaciones" rows="2" [(ngModel)]="vacunaActual.observaciones" placeholder="Lote, marca o indicaciones..."></textarea>
-          </div>
-          <div class="text-end mt-4">
-            <button type="button" class="btn btn-light me-2 fw-bold px-4" data-bs-dismiss="modal">Cancelar</button>
-            <button type="submit" class="btn btn-info text-white fw-bold px-4 shadow-sm" [disabled]="!formVacuna.valid">
-              <i class="bi bi-save"></i> Registrar Vacuna
+          
+          <div class="modal-footer border-0 px-0 pb-0 pt-3">
+            <button type="button" class="btn btn-light me-2 fw-bold px-4" data-bs-dismiss="modal" [disabled]="isLoading">Cerrar</button>
+            <button type="submit" class="btn btn-primary fw-bold px-5 shadow-sm" [disabled]="!formAtencion.valid || isLoading">
+              <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+              <i class="bi bi-check2-all me-1" *ngIf="!isLoading"></i> Finalizar Atención
             </button>
           </div>
         </form>

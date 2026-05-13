@@ -52,6 +52,7 @@ export class CitaList implements OnInit {
   vacunaActual: any = {
     mascota_id: '', nombre: '', fecha_aplicacion: '', proxima_dosis: '', observaciones: ''
   };
+  aplicarVacunaCheckbox: boolean = false;
 
   constructor(
     private citaService: Cita,
@@ -193,13 +194,6 @@ export class CitaList implements OnInit {
         next: () => {
           this.mostrarAviso(`Cita marcada como ${nuevoEstado}.`);
           this.cargarDatos();
-          
-          if (nuevoEstado === 'completada' && (this.rol === 'veterinario' || this.rol === 'admin')) {
-             const citaCompletada = this.citas.find(c => c.id === id);
-             if (citaCompletada && confirm('¿Deseas completar el historial médico ahora?')) {
-                 this.abrirModalHistorial(citaCompletada);
-             }
-          }
         },
         error: (err) => alert(err.error?.error || 'Error al actualizar estado')
       });
@@ -224,8 +218,19 @@ export class CitaList implements OnInit {
     });
   }
 
-  abrirModalHistorial(cita: any) {
+  abrirModalAtencion(cita: any) {
     this.citaParaHistorial = cita;
+    
+    // Cambiar estado a 'en_consulta' si estaba confirmada o pendiente
+    if (cita.estado === 'confirmada' || cita.estado === 'pendiente') {
+      this.citaService.actualizarEstado(cita.id, 'en_consulta').subscribe({
+        next: () => {
+           cita.estado = 'en_consulta';
+           this.cdr.detectChanges();
+        }
+      });
+    }
+
     this.historialActual = {
       cita_id: cita.id,
       mascota_id: cita.mascota_id,
@@ -236,30 +241,7 @@ export class CitaList implements OnInit {
       notas: '',
       proxima_visita: ''
     };
-    const modal = new bootstrap.Modal(document.getElementById('modalHistorial'));
-    modal.show();
-  }
 
-  guardarHistorial() {
-    this.historialService.crearHistorial(this.historialActual).subscribe({
-      next: () => {
-        this.cerrarModal('modalHistorial');
-        this.mostrarAviso('Historial médico creado exitosamente.');
-        this.cargarDatos();
-
-        // Mostrar módulo vacunas automáticamente según tipo_consulta
-        if (this.citaParaHistorial && 
-           ['Vacunación', 'Control', 'General'].includes(this.citaParaHistorial.tipo_consulta)) {
-           if (confirm('El tipo de consulta sugiere vacunación. ¿Deseas aplicar una vacuna ahora?')) {
-             this.abrirModalVacuna(this.citaParaHistorial);
-           }
-        }
-      },
-      error: (err) => alert(err.error?.error || 'Error al crear historial médico')
-    });
-  }
-
-  abrirModalVacuna(cita: any) {
     this.vacunaActual = {
       mascota_id: cita.mascota_id,
       nombre: '',
@@ -267,17 +249,43 @@ export class CitaList implements OnInit {
       proxima_dosis: '',
       observaciones: ''
     };
-    const modal = new bootstrap.Modal(document.getElementById('modalVacuna'));
+
+    const tiposVacuna = ['Vacunación', 'General', 'Control'];
+    this.aplicarVacunaCheckbox = tiposVacuna.includes(cita.tipo_consulta);
+
+    const modal = new bootstrap.Modal(document.getElementById('modalAtencion'));
     modal.show();
   }
 
-  guardarVacuna() {
-    this.vacunaService.crearVacuna(this.vacunaActual).subscribe({
+  guardarAtencion() {
+    this.historialService.crearHistorial(this.historialActual).subscribe({
       next: () => {
-        this.cerrarModal('modalVacuna');
-        this.mostrarAviso('Vacuna aplicada y registrada exitosamente.');
+        if (this.aplicarVacunaCheckbox && this.vacunaActual.nombre) {
+          this.vacunaService.crearVacuna(this.vacunaActual).subscribe({
+            next: () => this.finalizarAtencion(),
+            error: (err) => {
+              alert(err.error?.error || 'Error al guardar vacuna');
+              this.finalizarAtencion(); // Finalize anyway
+            }
+          });
+        } else {
+          this.finalizarAtencion();
+        }
       },
-      error: (err) => alert(err.error?.error || 'Error al registrar vacuna')
+      error: (err) => {
+        alert(err.error?.error || 'Error al crear historial médico');
+      }
+    });
+  }
+
+  finalizarAtencion() {
+    this.citaService.actualizarEstado(this.citaParaHistorial.id, 'completada').subscribe({
+      next: () => {
+        this.cerrarModal('modalAtencion');
+        this.mostrarAviso('Atención médica registrada y cita completada exitosamente.');
+        this.cargarDatos();
+      },
+      error: (err) => alert(err.error?.error || 'Error al completar la cita')
     });
   }
 
@@ -312,6 +320,7 @@ export class CitaList implements OnInit {
     const mapa: Record<string, string> = {
       pendiente: 'bg-warning text-dark',
       confirmada: 'bg-info text-dark',
+      en_consulta: 'bg-primary text-white',
       completada: 'bg-success',
       cancelada: 'bg-danger',
     };
