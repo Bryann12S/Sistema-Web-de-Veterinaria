@@ -9,6 +9,9 @@ const { authorize } = require('../middlewares/roleMiddleware');
 // Obtener citas por fecha
 router.get('/fecha', verificacionToken, authorize('admin', 'veterinario'), citaController.getPorFecha);
 
+// Obtener horas ocupadas para una fecha (público para clientes)
+router.get('/ocupadas/:fecha', verificacionToken, citaController.getHorasOcupadas);
+
 // ========== RUTAS DINÁMICAS ==========
 
 // Listar citas (todos los roles, el controller filtra por rol)

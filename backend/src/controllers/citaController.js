@@ -52,6 +52,19 @@ const citaController = {
             res.status(500).json({ error: error.message });
         }
     },
+    //obtener horas ocupadas por fecha
+    getHorasOcupadas: async (req, res) => {
+        try {
+            const { fecha } = req.params;
+            const citas = await Cita.getByfecha(fecha);
+            const horasOcupadas = citas
+                .filter(c => c.estado !== 'cancelada')
+                .map(c => c.hora.substring(0, 5));
+            res.json(horasOcupadas);
+        } catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    },
     //agendar cita
     crear: async (req, res) => {
         try {
