@@ -1,1 +1,7 @@
-/* Estilos para el registro */
+:host {
+	display: block;
+	min-height: 100vh;
+	background:
+		linear-gradient(135deg, rgba(13, 110, 253, 0.42), rgba(255, 255, 255, 0.18)),
+		url('../../assets/mascotas.png') center / cover no-repeat;
+}
